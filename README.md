@@ -91,10 +91,3 @@ the import function looks like so:
   ; a function returns $ automatically, the last variable listed works too
 )
 ```
-in other words
-```
-(msg square_and_add |x {is_scalar: n| {is_scalar}
-  x*2;
-  x := (x+1);
-)
-```
