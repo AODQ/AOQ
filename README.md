@@ -2,7 +2,7 @@
 An interpreted language based off OO, messaging and functional principles (smalltalk+lisp)
 
 
-
+```
 (import io); import &lt;- ioa
 import [thread io math]; translates to (needs ;):
  (import (~ thread io math))
@@ -19,11 +19,11 @@ import [thread io math]; translates to (needs ;):
      (y load_import) ; &lt;&lt; procedural (load_import(y))
    )
  )
-
+```
 
  which translates to
 
-
+```
  (
    (
      (y load_import :) ; load_import &lt;- : implies only use local definition on y
@@ -43,59 +43,11 @@ import [thread io math]; translates to (needs ;):
   (x (x 1 +) :=) ; (how it looks when fully interpreted)
   ; a function returns $ automatically, the last variable listed works too
 )
-
+```
 in other words
-
+```
 (fn square_and_add |x {is_scalar: n| {is_scalar}
   x*2;
   x := (x+1);
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
