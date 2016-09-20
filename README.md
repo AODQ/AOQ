@@ -8,7 +8,7 @@ example program
 (import (~ math io))
 (import limits "")
 
-(msg Sqrt_And_Double |x|
+(msg Sqrt_And_Double |x!scalar|
   {body
    $$ + (std:sqrt x x); return 2(sqrt(x)) - ($$ is local scope var and
                       ;                     defaults to current scope)
@@ -18,6 +18,15 @@ example program
     % 0 . % -23 . % 239 . % "asdf" . % 24.231
   }
 )
+
+(msg Sqr_And_Double |x!array|
+ {body
+   (foreach x `(|n| ~= ((** n n)*2)));
+   $@;
+ }
+ {in assert (foreach x `(|n!scalar| n>0)) "Must be > 0"}
+)
+
 (msg R_Sign |x|
   {body
     ((x < 0) ? false) . true
@@ -31,7 +40,7 @@ example program
 
 (msg Sqrt_And_Double_Alternative | x |
   x (std:sqrt) x; infix squareroot
-  (| y | := $) ; Create new variable, set it to unnamed func var
+  (| y | := $) ; Create new variable, set it to unnamed var
   $ $ +; add, postfix no parens
   * 2 y; double, prefix no parens
 )
@@ -48,46 +57,17 @@ example program
 
 ```
 
-how it works
+strange rules and oddities (until I can write proper documentation)
 ```
-(import io); import <- ioa
-import [thread io math]; translates to (needs ;):
-(import (~ thread io math))
-(import (thread io math ~))
-io <- ~ <- math becomes [io math]
-thread <- ~ <- [io math] becomes [thread io math]
-though later on [..] should skip this process
-import <- [thread io math]
-the import function looks like so:
-(msg import |x|
-  (foreach |y:x|c
-    y:load_import ; << object oriented (y.load_import())
-    OR
-    (y load_import) ; << procedural (load_import(y))
-  )
-)
-```
-
- which translates to
-
-```
- (
-   (
-     (y load_import :) ; load_import <- : implies only use local definition on y
-    |y:x| foreach ; (y load_import :)<- |y:x| <- foreach
-   )
-  |x| import msg ; |x| <- import <- msg gives function declaration (params + label)
-                ; then anon func <- declaration gives label to that function definition
- )
-;   label          params         return type (note {} implies constraints)
-(msg square_and_add |x {is_scalar}| {is_scalar} ; is_scalar implies float, double, int, etc
-  x*2 ; inline operators are allowed as long as both sides are "balanced"
-      ; note this isn't stored into x, it's stored into the anon function register $
-      ; interps: ($ (x 2 +) := )
-  x := (x + 1) ; OR
-  (:= x (x + 1)) ; OR
-  (:= x (+ x 1)) ; OR
-  (x (x 1 +) :=) ; (how it looks when fully interpreted)
-  ; a function returns $ automatically, the last variable listed works too
-)
+) Every object/message can only take one or zero arguments
+) Every object is constant, except for the unnamed variables
+) Nearby operators are actualy two objects (:= becomes (= :))
+) ; is a comment, but also traverses to next statement '.' can be used for statements on one line
+) $ is always returned if the last line ends with ; the value of which is the last calculation (if you
+     wanted to, say, return an x, the variable by itself counts as a calculation)
+) | x y | is actually (^ (~ x y)) and thus not only are the two combined and created, but
+          | x y | := [2, 5]
+  is valid syntax: ((= :) (^ (~ x y)) (~ 2 5))
+) Since all objects can only have one operator, [x y z] becomes (~ (~ x y) z). So (x + y) + z is valid
+    
 ```
