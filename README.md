@@ -18,6 +18,7 @@ example program
     % 0 . % -23 . % 239 . % "asdf" . % 24.231
   }
 )
+
 (msg Sqr_And_Double |x!array|
  {body
    (foreach x `(|n| ~= ((** n n)*2)));
@@ -25,6 +26,7 @@ example program
  }
  {in assert (foreach x `(|n!scalar| n>0)) "Must be > 0"}
 )
+
 (msg R_Sign |x|
   {body
     ((x < 0) ? false) . true
