@@ -8,7 +8,7 @@ example program
 (import (~ math io))
 (import limits "")
 
-(msg Sqrt_And_Double |x|
+(msg Sqrt_And_Double |x!scalar|
   {body
    $$ + (std:sqrt x x); return 2(sqrt(x)) - ($$ is local scope var and
                       ;                     defaults to current scope)
@@ -17,6 +17,13 @@ example program
   {unittest
     % 0 . % -23 . % 239 . % "asdf" . % 24.231
   }
+)
+(msg Sqr_And_Double |x!array|
+ {body
+   (foreach x `(|n| ~= ((** n n)*2)));
+   $@;
+ }
+ {in assert (foreach x `(|n!scalar| n>0)) "Must be > 0"}
 )
 (msg R_Sign |x|
   {body
@@ -54,8 +61,8 @@ strange rules and oddities (until I can write proper documentation)
 ) Every object is constant, except for the unnamed variables
 ) Nearby operators are actualy two objects (:= becomes (= :))
 ) ; is a comment, but also traverses to next statement '.' can be used for statements on one line
-) $ is always returned, the value of which is the last calculation (if you wanted to, say, return an x,
-    the variable by itself counts as a calculation)
+) $ is always returned if the last line ends with ; the value of which is the last calculation (if you
+     wanted to, say, return an x, the variable by itself counts as a calculation)
 ) | x y | is actually (^ (~ x y)) and thus not only are the two combined and created, but
           | x y | := [2, 5]
   is valid syntax: ((= :) (^ (~ x y)) (~ 2 5))
