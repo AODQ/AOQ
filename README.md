@@ -53,7 +53,7 @@ strange rules and oddities (until I can write proper documentation)
 ) Every object/message can only take one or zero arguments
 ) Every object is constant, except for the unnamed variables
 ) Nearby operators are actualy two objects (:= becomes (= :))
-) ; is a comment, but also traverses to next statement (if one is available)
+) ; is a comment, but also traverses to next statement '.' can be used for statements on one line
 ) $ is always returned, the value of which is the last calculation (if you wanted to, say, return an x,
     the variable by itself counts as a calculation)
 ) | x y | is actually (^ (~ x y)) and thus not only are the two combined, created, but
