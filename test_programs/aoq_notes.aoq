@@ -7,7 +7,7 @@
 (class Vector2 (
   (__MESSAGE (__DEFINE_DECLARATION (__LABEL ("new"))
                (__PARAMETERS (~ "x" "y") (~ scalar scalar)))
-             (__DEFINE_DEFINITON ( (:= ("x" "y" ~) ("_x" "_y" ~) $))
+             (__DEFINE_DEFINITON ( (:= (~ "x" "y") (~ "_x" "_y") $))
              )
   )
 
