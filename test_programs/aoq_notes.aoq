@@ -1,0 +1,18 @@
+{class Vector2 | x!scalar y!scalar |
+  {msg Dot_Product | other!Vector3 |
+    x*other:y + y*other:x
+  }
+}
+   --- becomes ---
+(class Vector2 (
+  (__MESSAGE (__DEFINE_DECLARATION (__LABEL ("new"))
+               (__PARAMETERS (~ "x" "y") (~ scalar scalar)))
+             (__DEFINE_DEFINITON ( (:= ("x" "y" ~) ("_x" "_y" ~) $))
+             )
+  )
+
+  (__MESSAGE (__DEFINE_DECLARATION (__LABEL "Dot_Product")
+               (__PARAMETERS (~ "other") (~ Vector3)))
+           (__DEFINE_DEFINITION ((* x (other y :)) (* y (other x)) +) )
+  )
+)

@@ -7,7 +7,7 @@ Symbol[] symbol_table;
 class Symbol {
 public:
   string receiver_str, sender_str, msg_str;
-  Type receiver_typ, sender_typ, msg_typ;
+  SymbolType receiver_typ, sender_typ, msg_typ;
   this(string s) {
     s = ' ' ~ s ~ ' ';
     string[] symbols;
@@ -45,11 +45,11 @@ public:
           vvariable = false;
       }
 
-      Type sym_typ = Symbol_Type.unknown;
+      Symol_Type sym_typ = Symbol_Type.unknown;
       if ( vinteger   ) sym_typ = Symbol_Type.integer;
       if ( vfloateger ) sym_typ = Symbol_Type.floateger;
-      if ( vvariable  ) sym_typ = Symbol_Type.variable;
-      if ( vsymbol    ) sym_typ = Symbol_Type.variable;
+      if ( vvariable  ) sym_typ = Symbol_Type.object;
+      if ( vsymbol    ) sym_typ = Symbol_Type.object;
       Parse_Err("Unable to interpret symbol", vsymbol == Symbol_Type.unknown);
       switch ( sym_it ) {
         case 0:
