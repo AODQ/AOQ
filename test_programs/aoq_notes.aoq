@@ -1,18 +1,64 @@
 {class Vector2 | x!scalar y!scalar |
-  {msg Dot_Product | other!Vector3 |
+  {msg Dot_Product | other!Vector2 |
     x*other:y + y*other:x
   }
 }
    --- becomes ---
-(class Vector2 (
-  (__MESSAGE (__DEFINE_DECLARATION (__LABEL ("new"))
-               (__PARAMETERS (~ "x" "y") (~ scalar scalar)))
-             (__DEFINE_DEFINITON ( (:= (~ "x" "y") (~ "_x" "_y") $))
-             )
-  )
-
-  (__MESSAGE (__DEFINE_DECLARATION (__LABEL "Dot_Product")
-               (__PARAMETERS (~ "other") (~ Vector3)))
-           (__DEFINE_DEFINITION ((* x (other y :)) (* y (other x)) +) )
+(class Vector2
+  (__MESSAGE_LIST
+    (__MESSAGE (__DEFINE_DECLARATION (__LABEL ("new"))
+                 (__PARAMETERS (~ "__x" "__y") (~ scalar scalar)))
+               (__DEFINE_DEFINITON (__INSTR_LIST (:= (~ "x" "y") (~ __x __y))) $)
+    )
+  
+    (__MESSAGE (__DEFINE_DECLARATION (__LABEL "Dot_Product")
+                 (__PARAMETERS (~ "other") (~ Vector2)))
+             (__DEFINE_DEFINITION (__INSTR_LIST (* x (other y :)) (* y (other x)) +))
+    )
   )
 )
+
+{class Vector3 |z!scalar|
+  mixin Vector2
+}
+   --- becomes ---
+(class Vector3
+  (__MESSAGE_LIST
+    (__MESSAGE (__DEFINE_DECLARATION (__LABEL ("new"))
+                 (__PARAMETERS (~ "__Vector2" "__z" (~ Vector2 scalar))))
+               (__DEFINE_DEFINITION (__INSTR_LIST (:= (~ "x" "y" "z") (~ __Vector2:x __Vector2:y z))) $)
+    )
+
+    (__MESSAGE (__DEFINE_DECLARATION (__LABEL "Dot_Product")
+                 (__PARAMETERS (~ "other") (~ Vector2)))
+             (__DEFINE_DEFINITION (__INSTR_LIST (* x (other y :)) (* y (other x)) +))
+    )
+  )
+)
+
+{class Vector4 |w!scalar|
+  mixin Vector3;
+  {msg new |vec3!Vector3 w!scalar|
+    |x y z w| := {~ vec3:x vec3:y (vec3:z * 2) w}
+  }
+}
+
+   --- becomes ---
+(class Vector4
+  (__MESSAGE_LIST
+    (__MESSAGE (__DEFINE_DECLARATION (__LABEL ("new"))
+                 (__PARAMETERS (~ "vec3" "w") (~ Vector3 scalar)))
+               (__DEFINE_DEFINITION (__INSTR_LIST (:= (~ "x" "y" "z" "w") (~ vec3:x vec3:y (* vec3:z 2) w))) $)
+    )
+    
+    (__MESSAGE (__DEFINE_DECLARATION (__LABEL "Dot_Product")
+                 (__PARAMETERS (~ "other") (~ Vector2)))
+             (__DEFINE_DEFINITION (__INSTR_LIST (* x (other y :)) (* y (other x)) +))
+    )
+  )
+)
+  
+
+{rfm 2 + 3*3 + 2*2 - 8)
+  --- becomes ---
+(- (+ 2 (+ (*3 3) (*2 2))) 8)
