@@ -1,5 +1,5 @@
 # AoQ
-An interpreted, functional, message-based object-oriented language.
+An interpreted, dynamically-typed, functional, message-based object-oriented language.
 Made only to learn
 
 example program
@@ -59,9 +59,16 @@ example program
 
 strange rules and oddities (until I can write proper documentation)
 ```
+) Everything is an object. (+ 3 5) is an object, the + is an object, the 3 is an object, etc.
 ) Every object/message can only take one or zero arguments
-) Every object is constant, except for the unnamed variables
+) Every object is constant
 ) Nearby operators are actualy two objects (:= becomes (= :))
+) Infix messages (ei: 3 + 5) are allowed if either both sides are 'balanced' (there is only one object
+    on each side), or there is no whitespace which allows for things like: x std:sqr y (two in-fix
+    messages disguised as one: (x (std:sqrt) y)
+) For oddities such as: std:math:sqrt. std:(math:sqrt) is clunky and nonsensical. In cases like this
+    is when you would use (: std math sqrt) which is the equivalent. Useful for things like
+    some_x!(~ (:x y z) (:a b c) d:f)
 ) ; is a comment, but also traverses to next statement '.' can be used for statements on one line
 ) $ is always returned if the last line ends with ; the value of which is the last calculation (if you
      wanted to, say, return an x, the variable by itself counts as a calculation)
