@@ -1,6 +1,8 @@
 module AOQ.Parser.Symbol;
 import AOQ.Parser.Context;
+import AOQ.Parser.Types;
 import AOQ.Types;
+import AOQ.Parser.Util;
 
 Symbol[] symbol_table;
 
@@ -24,8 +26,8 @@ public:
 
     // parse symbol
     int sym_it = 0;
-    std.stdio.writeln("PARSED SYMBOLS: ", symbols);
-    receiver_typ = sender_typ = msg_typ = Symbol_Type.unknown;
+    import std.stdio : writeln;
+    writeln("PARSED SYMBOLS: ", symbols);
     foreach ( sym ; symbols ) {
       bool vinteger, vfloateger, vvariable, vsymbol;
       vinteger = vfloateger = vvariable = vsymbol = true;
@@ -45,21 +47,35 @@ public:
           vvariable = false;
       }
 
-      Symol_Type sym_typ = Symbol_Type.unknown;
-      if ( vinteger   ) sym_typ = Symbol_Type.integer;
-      if ( vfloateger ) sym_typ = Symbol_Type.floateger;
-      if ( vvariable  ) sym_typ = Symbol_Type.object;
-      if ( vsymbol    ) sym_typ = Symbol_Type.object;
-      Parse_Err("Unable to interpret symbol", vsymbol == Symbol_Type.unknown);
+      SymbolType sym_typ;
+      if      ( vinteger   ) { sym_typ = SymbolType.integer;   }
+      else if ( vfloateger ) { sym_typ = SymbolType.floateger; }
+      else if ( vvariable  ) { sym_typ = SymbolType.object;    }
+      else if ( vsymbol    ) { sym_typ = SymbolType.object;    }
+      else {
+        Parse_Err("Unable to interpret symbol");
+      }
       switch ( sym_it ) {
         case 0:
           msg_str = sym; msg_typ = sym_typ;
+          // ---  DEBUG ---
+          import std.stdio : writeln;
+          writeln("MSG: ", sym, " : ", sym_typ);
+          // --- EDEBUG ---
         break;
         case 1:
           receiver_str = sym; receiver_typ = sym_typ;
+          // ---  DEBUG ---
+          import std.stdio : writeln;
+          writeln("RCVR: ", sym, " : ", sym_typ);
+          // --- EDEBUG ---
         break;
         case 2:
           sender_str = sym; sender_typ = sym_typ;
+          // ---  DEBUG ---
+          import std.stdio : writeln;
+          writeln("SNDR: ", sym, " : ", sym_typ);
+          // --- EDEBUG ---
         break;
         default:
           Parse_Err("Parser error, didn't break down context properly");

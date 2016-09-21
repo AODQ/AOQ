@@ -2,11 +2,12 @@ module AOQ.BE.Functions;
 import AOQ.Types;
 import AOQ.BE.Exception;
 import AOQ.BE.Class;
+import AOQ.BE.Obj;
 
 /// functions not compatible with AoQ.. yet
 struct NonAOQFunc {
 static:
-  bool Fn_Compatible_Values(Obj r, Obj s, int r_i, int s_i, string msg,
+  bool Fn_Compatible_Values(Obj r, Obj s, ulong r_i, ulong s_i, string msg,
                              bool throw_exception = true) {
     if ( r.base_class.value_names[r_i] != s.base_class.value_names[s_i] ) {
       // TODO: allow object to check if it implements the thing for the message
@@ -23,12 +24,18 @@ static:
     }
     return true;
   }
+  /// Assumes the operation is complaint (r <- fn+s is valid)
+  void Do_Operation(ref CoreDataType r, ref CoreDataType s,
+                    SymbolType  r_type, SymbolType  s_type, Obj fn) {
+  }
 }
 
 // --- default functions ---
-Obj Fn_Check_Message_Exists_One_Param(Obj r, string fn) {
+@disable Obj Fn_Check_Message_Exists_One_Param(Obj r, string fn) {
+  return Obj();
 }
-Obj Fn_Check_Message_Exists_Two_Param(Obj r, Obj s, string fn) {
+@disable Obj Fn_Check_Message_Exists_Two_Param(Obj r, Obj s, string fn) {
+  return Obj();
 }
 
 
