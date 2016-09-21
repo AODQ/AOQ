@@ -78,3 +78,4 @@ strange rules and oddities (until I can write proper documentation)
 ) Since all objects can only have one operator, [x y z] becomes (~ (~ x y) z). So (x + y) + z is valid
     
 ```
+For more information check notes: https://github.com/AODQ/AOQ/blob/master/test_programs/aoq_notes.aoq
