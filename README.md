@@ -59,7 +59,8 @@ example program
 
 strange rules and oddities (until I can write proper documentation)
 ```
-) Everything is an object. (+ 3 5) is an object, the + is an object, the 3 is an object, etc.
+) Everything is an object. (+ 3 5) is an object, the + is an object, the 3 is an object, etc. Even
+    the class is just an object.
 ) Every object/message can only take one or zero arguments
 ) Every object is constant
 ) Nearby operators are actualy two objects (:= becomes (= :))
@@ -76,6 +77,14 @@ strange rules and oddities (until I can write proper documentation)
           | x y | := [2, 5]
   is valid syntax: ((= :) (^ (~ x y)) (~ 2 5))
 ) Since all objects can only have one operator, [x y z] becomes (~ (~ x y) z). So (x + y) + z is valid
-    
+) Objects do not inherit, they compose. The mixin object mixes all of another object into the current
+    one, overriding any previous objects (so it is probably most practical for mixin to be the first
+    part of a class definition).
+) The { } scope is not for classes, definitions, etc. They are a "simplifier" -- they tell the
+    parser to reinterpret the objects in that scope into a useful meaning.
+) Objects that mixin the Operator can define a variable "Operator_Level." Then:
+      {rfm 2 + 3*3 + 2*2 - 8)
+    reformats to:
+      (- (+ 2 (+ (*3 3) (*2 2))) 8)
 ```
 For more information check notes: https://github.com/AODQ/AOQ/blob/master/test_programs/aoq_notes.aoq
