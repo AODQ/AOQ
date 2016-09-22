@@ -3,13 +3,6 @@ import std.string : string;
 import AOQ.Types;
 import AOQ.BE.Class;
 
-union CoreDataType {
-  Obj objeger;
-  int integer;
-  float floateger;
-  string stringeger;
-}
-
 string CoreDataType_To_String(CoreDataType cdt, SymbolType t) {
   import std.conv : to;
   switch ( t ) {

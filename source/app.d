@@ -18,10 +18,11 @@ void Translate_File(string filename) {
   import AOQ.Parser.Symbol,
          AOQ.Parser.Context;
   auto c = new Context(file, it);
-  std.stdio.writeln(c);
-  std.stdio.writeln("----");
+  std.stdio.writeln("---- parsed contexts ----");
   c.Output();
+  std.stdio.writeln("---- created contexts, now parse symbols ----");
   auto e = c.Parse();
+  std.stdio.writeln("---- parsed symbols ----");
   std.stdio.writeln(e);
   foreach ( el ; e )
     el.Output();

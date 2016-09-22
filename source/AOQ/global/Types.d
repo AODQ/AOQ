@@ -9,6 +9,14 @@ enum SymbolType {
   boolean
 }
 
+union CoreDataType {
+  Obj objeger;
+  int integer;
+  float floateger;
+  string stringeger;
+}
+
+
 // default classes in AOQ
 enum DefaultClass {
   object,
