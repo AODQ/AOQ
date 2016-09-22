@@ -5,7 +5,15 @@ import AOQ.BE.Exception;
 import AOQ.BE.Functions;
 import AOQ.Types;
 
+class ClassString {
+  string string_name;
+  this(string _string_name) {
+    string_name = _string_name;
+  }
+}
+
 Class[] classes = [];
+ClassString[int] classes_indices = [];
 
 struct Class {
 public:
@@ -35,6 +43,13 @@ public:
 
 void Construct_Default_Classes() {
   classes.length = SymbolType.max+1;
+  classes_indices = [
+    "Object",
+    "Nil",
+    "Integer",
+    "+",
+    "Stringeger"
+  ];
   { // base_object
     auto _base_object = Class("object");
     _base_object.message_table_2 = [
@@ -104,7 +119,7 @@ void Construct_Default_Classes() {
     };
     classes[DefaultClass.integer] = _int;
   }
-  { // symbol
+  { // symbol + (TODO: expand to allow - etc)
     auto _symbol = _base;
     _symbol.class_name = "+";
     _symbol.message_table_2["Stringify"] = function(Obj r) {

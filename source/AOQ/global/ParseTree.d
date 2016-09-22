@@ -2,26 +2,46 @@ module AOQ.Global.ParseTree;
 import AOQ.Global.Types;
 
 class ParseNode {
-  ParseNode node_message, node_receiver, node_sender, node_parent;
-/// NOTE: For an object, since it can't possibly be known
-/// at parse-time what it can be, the CDT will be a string
-  SymbolType type;
-  CoreDataType data;
+  ParseNode node_receiver, node_sender;
+  Obj data;
+
+  this() {
+    data = Obj(null);
+  }
+
+  void Set(SymbolType t, string cdt) {
+    import std.conv : to;
+    switch ( t ) {
+      case SymbolType.integer:
+        data = Obj(to!int(cdt));
+      break;
+      case SymbolType.floateger:
+        data = Obj(to!int(cdt));
+      break;
+      case SymbolType.stringeger:
+        data = Obj(to!int(cdt));
+      break;
+      case SymbolType.objeger:
+        data = Obj(to!int(cdt));
+      break;
+    }
+  }
 }
 
 class ParseTree {
-  ParseNode head;
-  ParseNode current;
-public:
-  this(ParseNode _head) {
-    current = head = _head;
+  ParseNode head, current;
+  this() {
+    current = head = new ParseNode();
   }
-  void Down(ParseNode n) in {
+
+  ParseNode R_Head() { return head; }
+
+
+  void Down() in {
     assert(current !is null)
   } body {
-    if ( current.node_message == null )
-      current = current.node_message = n;
-    else if ( current.node_receiver == null )
+    auto n = new ParseNode();
+    if      ( current.node_receiver == null )
       current = current.node_receiver = n;
     else if ( current.node_sender  == null )
       current = current.node_sender = n;
@@ -29,11 +49,13 @@ public:
       throw new Exception("Failed to deepen, nowhere to go");
     }
   }
+
   void Up() in {
     assert(current !is null && current.node_parent !is null);
   } body {
     current = current.node_parent;
   }
+
   void Set_Node_Info(string sym) {
     // --- parse symbol to check type
     bool vinteger, vfloateger, vvariable, vsymbol;

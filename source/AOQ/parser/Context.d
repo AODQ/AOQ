@@ -3,6 +3,26 @@ import AOQ.Parser.Symbol;
 import AOQ.Parser.Util;
 
 ParseTree Generate_Parse_Tree() {
+  ParseTree tree;
+  tree.Set_Node_Info("Stringify");
+  int start_pos = -1;
+  for ( i ; 0 .. str.length ) {
+    if ( str[i] == '(' ) {
+      tree.Down();
+      continue;
+    } if ( str[i] == ')' ) {
+      tree.Up();
+      continue;
+    }
+    if ( start_pos == -1 ) {
+      if ( str[i] != ' ' )
+        start_pos = i;
+    } else if ( str[i] == ' ' ) {
+        Sent_Node_Info(str[start_pos .. i-1]);
+        start_pos = -1;
+      }
+    }
+  }
 }
 
 class Context {

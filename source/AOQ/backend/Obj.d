@@ -54,6 +54,9 @@ public:
   }
   this(Class* _base_class) {
     base_class = _base_class;
+    if ( base_class == null ) {
+      base_class = classes[DefaultClass.nil];
+    }
     values.length = base_class.value_names.length;
     foreach ( n ; 0 .. values.length )
       values[n].objeger = Obj(SymbolType.object);
