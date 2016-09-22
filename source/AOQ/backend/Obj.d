@@ -14,8 +14,11 @@ string CoreDataType_To_String(CoreDataType cdt, SymbolType t) {
   import std.conv : to;
   switch ( t ) {
     default: assert(0);
-    case SymbolType.integer:
-      return to!string(cdt.integer);
+    case SymbolType.stringeger: return cdt.stringeger;
+    case SymbolType.floateger:  return to!string(cdt.floateger);
+    case SymbolType.integer:    return to!string(cdt.integer);
+    case SymbolType.object:
+      return cdt.objeger.Call_Function("Stringify").values[0].stringeger;
   }
 }
 
@@ -26,18 +29,14 @@ struct Obj {
     values[0].integer = 0;
   }
   void Make_A_String(string str) {
-  // ---  DEBUG ---
-  import std.stdio : writeln;
-  writeln("CLASS: ", cast(int)DefaultClass.stringeger, ", THEN: ",
-                     classes[DefaultClass.stringeger]);
-  // --- EDEBUG ---
     base_class = &classes[DefaultClass.stringeger];
     values.length = 1;
-    values[0].stringeger = "";
+    values[0].stringeger = str;
   }
 public:
   Class* base_class;
   CoreDataType[] values;
+
   this(SymbolType symbol) {
     switch ( symbol ) {
       case SymbolType.integer:
@@ -55,24 +54,12 @@ public:
     }
   }
   this(string str) {
-    // ---  DEBUG ---
-    import std.stdio : writeln;
-    writeln("MAKING A STRING: " ~ str);
-    // --- EDEBUG ---
     Make_A_String(str);
-    // ---  DEBUG ---
-    import std.stdio : writeln;
-    writeln("BASE CLASS: ", base_class);
-    // --- EDEBUG ---
   }
   this(int i) {
     Make_An_Integer(i);
   }
   this(Class* _base_class) {
-    // ---  DEBUG ---
-    import std.stdio : writeln;
-    writeln("SETTING TO: ", base_class, " , + ", classes[DefaultClass.symbol]);
-    // --- EDEBUG ---
     base_class = _base_class;
     values.length = base_class.value_names.length;
     foreach ( n ; 0 .. values.length )
@@ -99,6 +86,10 @@ public:
   /// Checks that functions exists and then calls it
   Obj Call_Function(string fn_name) {
     auto loc = (fn_name in base_class.message_table_2);
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln("CALLING FN: ", base_class.message_table_2);
+    } // --- EDEBUG ---
     if ( loc !is null ) {
       return (*loc)(this);
     }
@@ -114,16 +105,6 @@ public:
     return Obj();
   }
   string R_String_Value(ulong index) {
-  // ---  DEBUG ---
-  import std.stdio : writeln;
-  // ---  DEBUG ---
-  import std.stdio : writeln;
-  writeln("BASE CLASS: ", base_class);
-  // --- EDEBUG ---
-writeln("BASE_CLASS: ", base_class.class_name, " LEN: ",
-                          base_class.value_types.length,
-                        " COMP: ",
-                          values.length);
   // --- EDEBUG ---
     return CoreDataType_To_String(values[index],
                   base_class.value_types[index]);

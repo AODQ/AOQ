@@ -15,7 +15,7 @@ enum DefaultClass {
   nil,
   integer,
   symbol,
-  stringeger,
+  stringeger
 };
 
 immutable(string) Default_base_value_name = "__CORE__";

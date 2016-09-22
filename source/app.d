@@ -49,7 +49,8 @@ void Interpret_File() {
       case SymbolType.object:
         switch ( str ) {
           case "+":
-            return Obj(&classes[DefaultClass.symbol]);
+            auto e = Obj(&classes[DefaultClass.symbol]);
+            return e;
           default: assert(0);
         }
       // break;

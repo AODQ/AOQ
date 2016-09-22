@@ -21,6 +21,15 @@ public:
     class_name = _class_name;
     import AOQ.BE.Functions;
   }
+
+  this(this) {
+    class_name      = class_name.dup;
+    value_indices   = value_indices.dup;
+    value_names     = value_names.dup;
+    value_types     = value_types.dup;
+    message_table_2 = message_table_2.dup;
+    message_table_3 = message_table_3.dup;
+  }
 }
 
 
@@ -33,10 +42,6 @@ void Construct_Default_Classes() {
         return Obj(r.base_class.class_name);
       },
       "Stringify"      : function(Obj r) {
-      { // ---  DEBUG ---
-        import std.stdio;
-          writeln("EVALUATING BASE OBJECT ", r.base_class.class_name);
-      } // --- EDEBUG ---
         return Obj(r.base_class.class_name);
       }
     ];
@@ -65,10 +70,6 @@ void Construct_Default_Classes() {
     // -- define functions
     _int.message_table_2["Stringify"] = function(Obj r) {
       import std.conv : to;
-      { // ---  DEBUG ---
-        import std.stdio;
-        writeln("EVALUATING INTEGER ", to!string(r.values[0].integer));
-      } // --- EDEBUG ---
       return Obj(to!string(r.values[0].integer));
     };
     _int.message_table_3["+"] = function(Obj r, Obj s) {
@@ -107,12 +108,8 @@ void Construct_Default_Classes() {
     auto _symbol = _base;
     _symbol.class_name = "+";
     _symbol.message_table_2["Stringify"] = function(Obj r) {
-      { // ---  DEBUG ---
-        import std.stdio;
-        writeln("STRINGIFY: ", r);
-        writeln(" :: ", r.base_class.class_name);
-      } // --- EDEBUG ---
-      return r;
+      auto e = Obj(r.base_class.class_name);
+      return e;
     };
     classes[DefaultClass.symbol] = _symbol;
   }
