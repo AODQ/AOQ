@@ -35,7 +35,7 @@ void Construct_Default_Classes() {
       "Stringify"      : function(Obj r) {
       { // ---  DEBUG ---
         import std.stdio;
-        writeln("EVALUATING BASE OBJECT ", r.base_class.class_name);
+          writeln("EVALUATING BASE OBJECT ", r.base_class.class_name);
       } // --- EDEBUG ---
         return Obj(r.base_class.class_name);
       }
