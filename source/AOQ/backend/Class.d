@@ -29,28 +29,15 @@ void Construct_Default_Classes() {
   { // base_object
     auto _base_object = Class("object");
     _base_object.message_table_2 = [
-      "R_Name"         : function(Obj r) {
-        Throw_Exception("Not yet implemented");
-        return Obj();
-      },
       "R_ClassName"    : function(Obj r) {
         return Obj(r.base_class.class_name);
       },
       "Stringify"      : function(Obj r) {
-      // ---  DEBUG ---
-      import std.stdio : writeln;
-      writeln("ATTEMPING TO STRINGIFY");
-      // --- EDEBUG ---
-        import std.conv : to;
-        string s = "{\n  ";
-        auto bcl = r.base_class;
-        foreach ( n ; 0 .. bcl.value_types.length ) {
-          s ~= "\"" ~ to!string(bcl.value_names[n]) ~ "\"" ~
-               " (" ~ to!string(bcl.value_types[n]) ~ ") " ~
-               "= " ~          r.R_String_Value(n) ~ ";\n";
-        }
-        s ~= "}";
-        return Obj(s);
+      { // ---  DEBUG ---
+        import std.stdio;
+        writeln("EVALUATING BASE OBJECT ", r.base_class.class_name);
+      } // --- EDEBUG ---
+        return Obj(r.base_class.class_name);
       }
     ];
     _base_object.message_table_3 = [
@@ -65,6 +52,9 @@ void Construct_Default_Classes() {
     auto _nil = _base;
     _nil.class_name = "null";
     classes[DefaultClass.nil] = _nil;
+    _nil.message_table_2["Stringify"] = function(Obj r) {
+      return Obj("nil");
+    };
   }
   { // integer
     auto _int = _base;
@@ -73,6 +63,14 @@ void Construct_Default_Classes() {
     _int.value_names   = [Default_base_value_name];
     _int.value_types   = [SymbolType.integer];
     // -- define functions
+    _int.message_table_2["Stringify"] = function(Obj r) {
+      import std.conv : to;
+      { // ---  DEBUG ---
+        import std.stdio;
+        writeln("EVALUATING INTEGER ", to!string(r.values[0].integer));
+      } // --- EDEBUG ---
+      return Obj(to!string(r.values[0].integer));
+    };
     _int.message_table_3["+"] = function(Obj r, Obj s) {
       NonAOQFunc.Fn_Value_Length_Match(r, s);
       foreach ( i; 0 .. r.values.length ) {
@@ -82,13 +80,6 @@ void Construct_Default_Classes() {
         // TODO: use a mixin to generalize this
         switch ( receiver_type ) {
           default: assert(0);
-          // case SymbolType.object:
-          //   switch ( sender_type ) {
-          //     case SymbolType.object:
-          //       r.object.Receive_Msg(s.object, fn);
-          //     break;
-          //   }
-          // break;
           case SymbolType.integer:
             switch ( sender_type ) {
               default: assert(0);
@@ -112,10 +103,18 @@ void Construct_Default_Classes() {
     };
     classes[DefaultClass.integer] = _int;
   }
-  { // sym_add
-    auto _sym_add = _base;
-    _sym_add.class_name = "+";
-    classes[DefaultClass.sym_add] = _sym_add;
+  { // symbol
+    auto _symbol = _base;
+    _symbol.class_name = "+";
+    _symbol.message_table_2["Stringify"] = function(Obj r) {
+      { // ---  DEBUG ---
+        import std.stdio;
+        writeln("STRINGIFY: ", r);
+        writeln(" :: ", r.base_class.class_name);
+      } // --- EDEBUG ---
+      return r;
+    };
+    classes[DefaultClass.symbol] = _symbol;
   }
   { // stringeger
     auto _str = _base;
@@ -123,6 +122,9 @@ void Construct_Default_Classes() {
     _str.value_indices = [Default_base_value_name: 0];
     _str.value_names   = [Default_base_value_name];
     _str.value_types   = [SymbolType.stringeger];
+    _str.message_table_2["Stringify"] = function(Obj r) {
+      return r;
+    };
     classes[DefaultClass.stringeger] = _str;
   }
   // -- set to classes

@@ -14,7 +14,7 @@ enum DefaultClass {
   object,
   nil,
   integer,
-  sym_add,
+  symbol,
   stringeger,
 };
 

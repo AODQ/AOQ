@@ -49,7 +49,7 @@ void Interpret_File() {
       case SymbolType.object:
         switch ( str ) {
           case "+":
-            return Obj(&classes[DefaultClass.sym_add]);
+            return Obj(&classes[DefaultClass.symbol]);
           default: assert(0);
         }
       // break;

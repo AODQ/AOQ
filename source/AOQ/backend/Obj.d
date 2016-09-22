@@ -71,7 +71,7 @@ public:
   this(Class* _base_class) {
     // ---  DEBUG ---
     import std.stdio : writeln;
-    writeln("SETTING TO: ", base_class, " , + ", classes[DefaultClass.sym_add]);
+    writeln("SETTING TO: ", base_class, " , + ", classes[DefaultClass.symbol]);
     // --- EDEBUG ---
     base_class = _base_class;
     values.length = base_class.value_names.length;
@@ -79,10 +79,21 @@ public:
       values[n].objeger = Obj(SymbolType.object);
   }
   Obj Receive_Msg(Obj context) {
-    return Call_Function(context.base_class.class_name);
+    auto msg_name = context.Call_Function("Stringify");
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
+    } // --- EDEBUG ---
+    return Call_Function(msg_name.values[0].stringeger);
   }
   Obj Receive_Msg(Obj sender, Obj context) {
-    return Call_Function(context.base_class.class_name, sender);
+    auto msg_name = context.Call_Function("Stringify");
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln("RECEIVED MESSAGE: ", msg_name);
+      writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
+    } // --- EDEBUG ---
+    return Call_Function(msg_name.values[0].stringeger, sender);
   }
   import AOQ.BE.Exception;
   /// Checks that functions exists and then calls it
