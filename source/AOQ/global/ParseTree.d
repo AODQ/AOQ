@@ -32,16 +32,55 @@ class ParseNode {
 }
 
 class ParseTree {
-  ParseNode Root, current;
-  int deepest_layer; // useful for printing
+private:
+  ParseNode root, current;
+  int R_Height(ParseNode pn) {
+    if ( pn is null ) return -1;
+    int r_height = R_Height(pn.node_receiver),
+        s_height = R_Height(pn.node_sender);
+    return r_height > s_height ? s_height+1 : r_height+1;
+  }
+public:
+  int R_Height() {
+    return R_Height(root) + 1;
+  }
   this() {
-    Root = new ParseNode();
-    deepest_layer = 2;
-    Root.data = Obj("Stringify");
+    root = new ParseNode();
+    root.data = Obj("Stringify");
+    current = root;
   }
 
-  ParseNode R_Root() { return Root; }
+  ParseNode R_Root() { return root; }
 
+  ParseNode R_Current() { return current; }
+
+  string R_Current_ParseNode_String() {
+    return current.data.Receive_Msg(Obj("Stringify")).values[0].stringeger;
+  }
+
+  /// Returns pretty-print version of tree
+  /// Format:
+  /** (* (+ (/ 3 (C X Y) 3) some_var) becomes
+    Stringify
+      |
+      |-- *
+          |
+          |-- +
+          |   |
+          |   |--/
+          |   |  |
+          |   |  |-- 3
+          |   |  |
+          |   |  |-- C
+          |   |      |
+          |   |      |-- X
+          |   |      |
+          |   |      --- Y
+          |   |
+          |   --- 3
+          |
+          |--- some_var
+  **/
   string opCast(T)() if (is(T == string)) {
     int layer = 0, c_layer_it = 0;
     bool left_side = false;
@@ -58,6 +97,8 @@ class ParseTree {
         node.data = Obj("NULL");
         // writeln(node.data);
       }
+      int deepest_layer = R_Height();
+      writeln("DEEPEST LAYER: ", deepest_layer);
       int width = 3 + (deepest_layer*deepest_layer - layer)*2;
       foreach ( i; 0 .. width ) {
         str ~= " ";
@@ -77,7 +118,7 @@ class ParseTree {
       }
     }
 
-    ParseNode[] q  = [ Root ];
+    ParseNode[] q  = [ root ];
     while ( q.length != 0 ) {
       auto t_node = q[$-1];
       q = q[0..$-1];
@@ -96,29 +137,35 @@ class ParseTree {
     return str;
   }
 
+
   void Down() in {
     assert(current !is null);
   } body {
-    ++ deepest_layer;
     auto n = new ParseNode();
     n.node_parent = current;
     if      ( current.node_receiver is null )
       current = current.node_receiver = n;
-    else if ( current.node_sender  is null )
+    else
       current = current.node_sender = n;
-    else {
-      throw new Exception("Failed to deepen, nowhere to go");
-    }
+    // else {
+    //   throw new Exception("Failed to deepen, nowhere to go");
+    // }
   }
 
   void Up() in {
     assert(current !is null && current.node_parent !is null);
   } body {
-    -- deepest_layer;
     current = current.node_parent;
   }
 
-  void Set_Node_Info(string sym) {
+  void Next() {
+    Up();
+    Down();
+  }
+
+  void Set_Node_Info(string sym) in {
+    assert(sym.length != 0);
+  } body {
     // --- parse symbol to check type
     bool vinteger, vfloateger, vvariable, vsymbol;
     vinteger = vfloateger = vvariable = vsymbol = true;
