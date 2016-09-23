@@ -5,15 +5,15 @@ import AOQ.BE.Exception;
 import AOQ.BE.Functions;
 import AOQ.Types;
 
-class ClassString {
-  string string_name;
-  this(string _string_name) {
-    string_name = _string_name;
-  }
-}
+// class ClassString {
+//   string string_name;
+//   this(string _string_name) {
+//     string_name = _string_name;
+//   }
+// }
 
 Class[] classes = [];
-ClassString[int] classes_indices = [];
+// ClassString[int] classes_indices = [];
 
 struct Class {
 public:
@@ -43,13 +43,13 @@ public:
 
 void Construct_Default_Classes() {
   classes.length = SymbolType.max+1;
-  classes_indices = [
-    "Object",
-    "Nil",
-    "Integer",
-    "+",
-    "Stringeger"
-  ];
+  // classes_indices = [
+  //   "Object",
+  //   "Nil",
+  //   "Integer",
+  //   "+",
+  //   "Stringeger"
+  // ];
   { // base_object
     auto _base_object = Class("object");
     _base_object.message_table_2 = [

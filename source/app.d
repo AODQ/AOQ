@@ -10,23 +10,27 @@ void Translate_File(string filename) {
     static import std.file;
     import std.conv : to;
     file = to!string(std.file.read(filename));
-    std.stdio.writeln(file);
-    file ~= ' '; // whitespace for parsing
+    // std.stdio.writeln(file);
+    // file ~= ' '; // whitespace for parsing
   }
   int it = 0;
   // Generate all contexts, then parses them for symbol table
   import AOQ.Parser.Symbol,
          AOQ.Parser.Context;
-  auto c = new Context(file, it);
-  std.stdio.writeln("---- parsed contexts ----");
-  c.Output();
-  std.stdio.writeln("---- created contexts, now parse symbols ----");
-  auto e = c.Parse();
-  std.stdio.writeln("---- parsed symbols ----");
-  std.stdio.writeln(e);
-  foreach ( el ; e )
-    el.Output();
-  symbol_table = e;
+  import std.stdio : writeln;
+  writeln("Generating parse tree");
+  Generate_Parse_Tree(file);
+
+  // auto c = new Context(file, it);
+  // std.stdio.writeln("---- parsed contexts ----");
+  // c.Output();
+  // std.stdio.writeln("---- created contexts, now parse symbols ----");
+  // auto e = c.Parse();
+  // std.stdio.writeln("---- parsed symbols ----");
+  // std.stdio.writeln(e);
+  // foreach ( el ; e )
+  //   el.Output();
+  // symbol_table = e;
 }
 
 void Interpret_File() {
@@ -38,7 +42,6 @@ void Interpret_File() {
          AOQ.Parser.Util,
          AOQ.Types;
   import AOQ.BE.Class, AOQ.BE.Obj;
-  Construct_Default_Classes();
   Obj Symbol_To_Object(SymbolType typ, string str) {
     // ---  DEBUG ---
     import std.stdio : writeln;
@@ -100,8 +103,10 @@ int main(string[] argv) {
     flags = argv[1 .. $-1];
   }
   std.stdio.writeln("reading from " ~ filename);
+  import AOQ.BE.Class;
+  Construct_Default_Classes();
   Translate_File(filename);
-  Interpret_File();
+  // Interpret_File();
   // ---  DEBUG ---
   import std.stdio : writeln;
   writeln("----------------------------------------------");

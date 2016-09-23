@@ -54,18 +54,18 @@ public:
   }
   this(Class* _base_class) {
     base_class = _base_class;
-    if ( base_class == null ) {
-      base_class = classes[DefaultClass.nil];
-    }
     values.length = base_class.value_names.length;
     foreach ( n ; 0 .. values.length )
       values[n].objeger = Obj(SymbolType.object);
+  }
+  static Obj Construct_Default() {
+    return Obj(&classes[DefaultClass.nil]);
   }
   Obj Receive_Msg(Obj context) {
     auto msg_name = context.Call_Function("Stringify");
     { // ---  DEBUG ---
       import std.stdio;
-      writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
+      // writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
     } // --- EDEBUG ---
     return Call_Function(msg_name.values[0].stringeger);
   }
@@ -73,8 +73,8 @@ public:
     auto msg_name = context.Call_Function("Stringify");
     { // ---  DEBUG ---
       import std.stdio;
-      writeln("RECEIVED MESSAGE: ", msg_name);
-      writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
+      // writeln("RECEIVED MESSAGE: ", msg_name);
+      // writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
     } // --- EDEBUG ---
     return Call_Function(msg_name.values[0].stringeger, sender);
   }
@@ -84,7 +84,7 @@ public:
     auto loc = (fn_name in base_class.message_table_2);
     { // ---  DEBUG ---
       import std.stdio;
-      writeln("CALLING FN: ", base_class.message_table_2);
+      // writeln("CALLING FN: ", base_class.message_table_2);
     } // --- EDEBUG ---
     if ( loc !is null ) {
       return (*loc)(this);
