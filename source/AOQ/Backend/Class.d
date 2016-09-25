@@ -1,8 +1,8 @@
-module AOQ.BE.Class;
-import AOQ.BE.Obj;
+module AOQ.Backend.Class;
+import AOQ.Backend.Obj;
 import std.string : string;
-import AOQ.BE.Exception;
-import AOQ.BE.Functions;
+import AOQ.Backend.Exception;
+import AOQ.Backend.Functions;
 import AOQ.Types;
 
 // class ClassString {
@@ -27,7 +27,7 @@ public:
   /// Construct class
   this(string _class_name) {
     class_name = _class_name;
-    import AOQ.BE.Functions;
+    import AOQ.Backend.Functions;
   }
 
   this(this) {

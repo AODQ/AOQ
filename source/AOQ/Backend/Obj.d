@@ -1,7 +1,7 @@
-module AOQ.BE.Obj;
+module AOQ.Backend.Obj;
 import std.string : string;
 import AOQ.Types;
-import AOQ.BE.Class;
+import AOQ.Backend.Class;
 
 string CoreDataType_To_String(CoreDataType cdt, SymbolType t) {
   import std.conv : to;
@@ -19,7 +19,12 @@ struct Obj {
   void Make_An_Integer(int i) {
     base_class = &classes[DefaultClass.integer];
     values.length = 1;
-    values[0].integer = 0;
+    values[0].integer = i;
+  }
+  void Make_A_Floateger(float i) {
+    base_class = &classes[DefaultClass.floateger];
+    values.length = 1;
+    values[0].floateger = i;
   }
   void Make_A_String(string str) {
     base_class = &classes[DefaultClass.stringeger];
@@ -52,6 +57,9 @@ public:
   this(int i) {
     Make_An_Integer(i);
   }
+  this(float i) {
+    Make_A_Floateger(i);
+  }
   this(Class* _base_class) {
     base_class = _base_class;
     values.length = base_class.value_names.length;
@@ -78,7 +86,7 @@ public:
     } // --- EDEBUG ---
     return Call_Function(msg_name.values[0].stringeger, sender);
   }
-  import AOQ.BE.Exception;
+  import AOQ.Backend.Exception;
   /// Checks that functions exists and then calls it
   Obj Call_Function(string fn_name) {
     auto loc = (fn_name in base_class.message_table_2);
@@ -104,5 +112,11 @@ public:
   // --- EDEBUG ---
     return CoreDataType_To_String(values[index],
                   base_class.value_types[index]);
+  }
+  /// Since AoQ's  function is so useful, this will do the work for you
+  /// Returns a string that represents this object as a label
+  string Stringify() {
+    if ( base_class == null ) return "NULL";
+    return Receive_Msg(Obj("Stringify")).values[0].stringeger;
   }
 }

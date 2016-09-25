@@ -1,8 +1,8 @@
-module AOQ.BE.Functions;
+module AOQ.Backend.Functions;
 import AOQ.Types;
-import AOQ.BE.Exception;
-import AOQ.BE.Class;
-import AOQ.BE.Obj;
+import AOQ.Backend.Exception;
+import AOQ.Backend.Class;
+import AOQ.Backend.Obj;
 
 /// functions not compatible with AoQ.. yet
 struct NonAOQFunc {

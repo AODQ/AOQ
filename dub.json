@@ -1,6 +1,6 @@
 {
-	"name": "aoq-interpreter",
-	"description": "AoQ",
+	"name": "aoq",
+	"description": "Odd Language",
 	"copyright": "Copyright © 2016, aod",
 	"authors": ["aod"],
 	"dependencies": {

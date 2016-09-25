@@ -1,13 +1,58 @@
 module AOQ.ParseTree;
 import AOQ.Types;
-import AOQ.BE.Obj;
+import AOQ.Backend.Obj;
+
+ParseTree Generate_Parse_Tree(string str) {
+  import std.stdio : writeln;
+  ParseTree tree = new ParseTree;
+  writeln("------------ tree BEFORE  ------------");
+  writeln(cast(string)tree);
+  writeln("--------------------------------------");
+  ulong start_pos = 0;
+  bool is_on_word = false;
+  foreach ( i ; 0 .. str.length ) {
+    // writeln("C: ", str[i]);
+    if ( str[i] == '(' ) {
+      writeln("Tree down");
+      tree.Down();
+      continue;
+    } if ( str[i] == ')' ) {
+      writeln("Tree up");
+      tree.Up();
+      continue;
+    }
+    if ( !is_on_word ) {
+      if ( str[i] != ' ' ) {
+        start_pos = i;
+        // writeln("is on word");
+        is_on_word = true;
+      }
+    } else if ( str[i] == ' ' ) {
+      if ( tree.R_Current_ParseNode_String() != "null" ) {
+        tree.Down();
+        tree.Set_Node_Info(str[start_pos .. i]);
+        tree.Up();
+      } else
+        tree.Set_Node_Info(str[start_pos .. i]);
+      writeln("Setting Node: ", tree.R_Current_ParseNode_String);
+      writeln("------------ tree diagram ------------");
+      writeln(cast(string)tree);
+      writeln("--------------------------------------");
+      is_on_word = false;
+    }
+  }
+  writeln("------------ tree diagram ------------");
+  writeln(cast(string)tree);
+  writeln("--------------------------------------");
+  return tree;
+}
 
 class ParseNode {
   ParseNode node_receiver, node_sender, node_parent;
   Obj data;
 
   this() {
-    import AOQ.BE.Class;
+    import AOQ.Backend.Class;
     data = Obj.Construct_Default();
   }
 
@@ -27,6 +72,28 @@ class ParseNode {
       case SymbolType.object:
         data = Obj(to!int(cdt));
       break;
+    }
+  }
+
+  // Adapted from Vasya Novikov's submission
+  // http://stackoverflow.com/questions/4965335/how-to-print-binary-tree-diagram
+  string Print() {
+    string t;
+    Print("", true, t);
+    return t;
+  }
+
+  private void Print ( string prefix, bool tail, ref string o ) {
+    import std.stdio : writeln;
+    o ~= prefix ~ (tail ? "└── " : "├── ") ~ data.Stringify() ~ '\n';
+    auto n_prefix = prefix ~ (tail ? "   " : "|   ");
+    ParseNode[] n_list;
+    if ( node_receiver !is null ) n_list ~= node_receiver;
+    if ( node_sender   !is null ) n_list ~= node_sender;
+    if ( n_list.length != 0 ) {
+      foreach ( i; 0 .. n_list.length-1 )
+        n_list[i].Print(n_prefix, false, o);
+      n_list[$-1].Print(n_prefix, true, o);
     }
   }
 }
@@ -60,81 +127,17 @@ public:
 
   /// Returns pretty-print version of tree
   /// Format:
-  /** (* (+ (/ 3 (C X Y) 3) some_var) becomes
+  /** (* (+ 4 3) some_var) becomes
     Stringify
       |
       |-- *
-          |
           |-- +
-          |   |
-          |   |--/
-          |   |  |
-          |   |  |-- 3
-          |   |  |
-          |   |  |-- C
-          |   |      |
-          |   |      |-- X
-          |   |      |
-          |   |      --- Y
-          |   |
-          |   --- 3
-          |
-          |--- some_var
+          |   |-- 4
+          |   '-- 3
+          '--- some_var
   **/
   string opCast(T)() if (is(T == string)) {
-    int layer = 0, c_layer_it = 0;
-    bool left_side = false;
-    string str = "";
-    // search using breadth-first, print location
-    void Print_Node ( ParseNode node ) {
-      import std.stdio : writeln;
-      bool nullify_node = false;
-      if ( node is null ) {
-        // writeln(node);
-        node = new ParseNode;
-        // writeln(node);
-        nullify_node = true;
-        node.data = Obj("NULL");
-        // writeln(node.data);
-      }
-      int deepest_layer = R_Height();
-      writeln("DEEPEST LAYER: ", deepest_layer);
-      int width = 3 + (deepest_layer*deepest_layer - layer)*2;
-      foreach ( i; 0 .. width ) {
-        str ~= " ";
-      }
-      // writeln("Sending message to node data");
-      str ~= node.data.Receive_Msg(Obj("Stringify")).values[0].stringeger;
-      // writeln("String parsed: ", str);
-      if ( c_layer_it ++ == layer ) {
-        c_layer_it = 0;
-        layer += 2;
-        str ~= "\n";
-      }
-      if ( nullify_node ) {
-        // writeln("Deleting node");
-        delete node;
-        node = null;
-      }
-    }
-
-    ParseNode[] q  = [ root ];
-    while ( q.length != 0 ) {
-      auto t_node = q[$-1];
-      q = q[0..$-1];
-      Print_Node(t_node);
-      // check left-hand
-      if ( t_node.node_receiver !is null )
-        q ~= t_node.node_receiver;
-      else
-        Print_Node(null);
-      // check right-hand
-      if ( t_node.node_sender   !is null )
-        q ~= t_node.node_sender;
-      else
-        Print_Node(null);
-    }
-    return str;
+    return root.Print();
   }
 
 
@@ -143,13 +146,13 @@ public:
   } body {
     auto n = new ParseNode();
     n.node_parent = current;
-    if      ( current.node_receiver is null )
+    if        ( current.node_receiver is null ) {
       current = current.node_receiver = n;
-    else
+    } else if ( current.node_sender   is null ) {
       current = current.node_sender = n;
-    // else {
-    //   throw new Exception("Failed to deepen, nowhere to go");
-    // }
+    } else {
+      throw new Exception("Failed to deepen, nowhere to go");
+    }
   }
 
   void Up() in {
