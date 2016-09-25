@@ -6,12 +6,14 @@ enum SymbolType {
   integer,
   floateger,
   stringeger,
-  boolean
+  booleaner,
+  nil
 }
 
 union CoreDataType {
   Obj objeger;
   int integer;
+  bool booleaner;
   float floateger;
   string stringeger;
 }
@@ -24,8 +26,31 @@ enum DefaultClass {
   integer,
   symbol,
   stringeger,
-  floateger
+  floateger,
+  booleaner,
+  UNKNOWN
 };
+
+enum DefaultMessageClass {
+  // operators ---
+  plus, minus, slash, asterik, percent, tilde, bslash,
+  // functions ---
+  stringify, _if
+}
+
+immutable(int[string]) DefaultMessageClass_map;
+static this() {
+  DefaultMessageClass_map = [
+    // operators ---
+    "+":  DefaultMessageClass.plus,    "-": DefaultMessageClass.minus,
+    "/": DefaultMessageClass.slash,    "*": DefaultMessageClass.asterik,
+    "%": DefaultMessageClass.percent,  "~": DefaultMessageClass.tilde,
+    "\\": DefaultMessageClass.bslash,
+    // functions ---
+    "Stringify": DefaultMessageClass.stringify,
+    "If":        DefaultMessageClass._if
+  ];
+}
 
 immutable(string) Default_base_value_name = "__CORE__";
 

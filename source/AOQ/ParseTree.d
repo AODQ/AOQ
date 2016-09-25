@@ -5,9 +5,9 @@ import AOQ.Backend.Obj;
 ParseTree Generate_Parse_Tree(string str) {
   import std.stdio : writeln;
   ParseTree tree = new ParseTree;
-  writeln("------------ tree BEFORE  ------------");
-  writeln(cast(string)tree);
-  writeln("--------------------------------------");
+  // writeln("------------ tree BEFORE  ------------");
+  // writeln(cast(string)tree);
+  // writeln("--------------------------------------");
   ulong start_pos = 0;
   bool is_on_word = false;
   foreach ( i ; 0 .. str.length ) {
@@ -17,7 +17,7 @@ ParseTree Generate_Parse_Tree(string str) {
       tree.Down();
       continue;
     } if ( str[i] == ')' ) {
-      writeln("Tree up");
+      // writeln("Tree up");
       tree.Up();
       continue;
     }
@@ -31,13 +31,15 @@ ParseTree Generate_Parse_Tree(string str) {
       if ( tree.R_Current_ParseNode_String() != "null" ) {
         tree.Down();
         tree.Set_Node_Info(str[start_pos .. i]);
+        // writeln("Setting Node: ", tree.R_Current_ParseNode_String);
         tree.Up();
-      } else
+      } else {
         tree.Set_Node_Info(str[start_pos .. i]);
-      writeln("Setting Node: ", tree.R_Current_ParseNode_String);
-      writeln("------------ tree diagram ------------");
-      writeln(cast(string)tree);
-      writeln("--------------------------------------");
+        // writeln("Setting Node: ", tree.R_Current_ParseNode_String);
+      }
+      // writeln("------------ tree diagram ------------");
+      // writeln(cast(string)tree);
+      // writeln("--------------------------------------");
       is_on_word = false;
     }
   }
@@ -158,16 +160,8 @@ public:
     auto n = new ParseNode();
     n.node_parent = current;
     if        ( current.node_receiver is null ) {
-    { // ---  DEBUG ---
-      import std.stdio;
-      writeln("Replacing Receiver");
-    } // --- EDEBUG ---
       current = current.node_receiver = n;
     } else if ( current.node_sender   is null ) {
-    { // ---  DEBUG ---
-      import std.stdio;
-      writeln("Replacing Sender");
-    } // --- EDEBUG ---
       current = current.node_sender = n;
     } else {
       throw new Exception("Failed to deepen, nowhere to go");
@@ -187,6 +181,10 @@ public:
   void Set_Node_Info(string sym) in {
     assert(sym.length != 0);
   } body {
+  { // ---  DEBUG ---
+    import std.stdio;
+    writeln("Setting node info for: ", sym);
+  } // --- EDEBUG ---
     // --- parse symbol to check type
     bool vinteger, vfloateger, vvariable, vsymbol;
     vinteger = vfloateger = vvariable = vsymbol = true;
@@ -194,6 +192,10 @@ public:
     vfloateger = false;
     char s0 = sym[0];
     vsymbol = sym.length == 1 && Is_Operator(s0);
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln("IS OPERATOR: ", Is_Operator(s0), " FOR: ", s0);
+    } // --- EDEBUG ---
     import std.uni : toLower;
     vvariable = toLower(s0) >= 'a' && toLower(s0) <= 'z';
     foreach ( i; sym ) {
@@ -211,18 +213,37 @@ public:
     //     to the correct data
     import std.conv : to;
     if ( vinteger ) {
-      root.data = Obj(to!int(sym));
+      { // ---  DEBUG ---
+        import std.stdio;
+        writeln("INTEGER!");
+      } // --- EDEBUG ---
+      current.data = Obj(to!int(sym));
     } else if ( vfloateger ) {
-      root.data = Obj(to!float(sym));
+      current.data = Obj(to!float(sym));
+      { // ---  DEBUG ---
+        import std.stdio;
+        writeln("FLOATEGER!");
+      } // --- EDEBUG ---
     } else if ( vvariable || vsymbol ) {
-      root.data = Obj(sym);
+      { // ---  DEBUG ---
+        import std.stdio;
+        writeln("VAR OR SYM!");
+      } // --- EDEBUG ---
+      current.data = Obj(sym);
       // ---- interpret into global objects ----
       import AOQ.Backend.Class;
-      switch ( sym ) {
-        default: break;
-        case "+":
-          root.data = Obj(&classes[DefaultClass.symbol]);
-        break;
+      auto sym_ind = (sym in DefaultMessageClass_map);
+      if ( sym_ind ) {
+        current.data = Obj(&symbol_classes[*sym_ind]);
+        { // ---  DEBUG ---
+          import std.stdio;
+          writeln("Interpreted symbol: ", current.data.Stringify);
+        } // --- EDEBUG ---
+      } else {
+      { // ---  DEBUG ---
+        import std.stdio;
+        writeln("Symbol not interpreted, must be variable: ", sym);
+      } // --- EDEBUG ---
       }
     } else {
       Parse_Err("Unable to interpret symbol: " ~ sym);

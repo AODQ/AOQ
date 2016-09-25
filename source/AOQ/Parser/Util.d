@@ -16,5 +16,6 @@ void Parse_Err(string str, bool expression = false) {
 }
 
 bool Is_Operator(char c) {
-  return (c == '.' || c == '=' || c == '+' || c == '-' || c == '/' || c == ':');
+  return (c == '.' || c == '=' || c == '+' || c == '-' || c == '/' || c == ':'
+                   || c == '\\');
 }

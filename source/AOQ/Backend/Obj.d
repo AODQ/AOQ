@@ -31,6 +31,11 @@ struct Obj {
     values.length = 1;
     values[0].stringeger = str;
   }
+  void Make_A_Bool(bool i) {
+    base_class = &classes[DefaultClass.booleaner];
+    values.length = 1;
+    values[0].booleaner = i;
+  }
 public:
   Class* base_class;
   CoreDataType[] values;
@@ -40,13 +45,17 @@ public:
       case SymbolType.integer:
         Make_An_Integer(0);
       break;
-      // case SymbolType.floateger:
-      //   base_class = classes[DefaultClass.integer];
-      //   values["CORE"] = 0;
-      //   values[0].floateger = 0.0f;
-      // break;
+      case SymbolType.floateger:
+        Make_A_Floateger(0.0f);
+      break;
       case SymbolType.stringeger:
         Make_A_String("");
+      break;
+      case SymbolType.booleaner:
+        Make_A_Bool(false);
+      break;
+      case SymbolType.nil:
+        base_class = &classes[DefaultClass.nil];
       break;
       default: assert(0);
     }
@@ -59,6 +68,9 @@ public:
   }
   this(float i) {
     Make_A_Floateger(i);
+  }
+  this(bool i) {
+    Make_A_Bool(i);
   }
   this(Class* _base_class) {
     base_class = _base_class;
@@ -113,10 +125,22 @@ public:
     return CoreDataType_To_String(values[index],
                   base_class.value_types[index]);
   }
-  /// Since AoQ's  function is so useful, this will do the work for you
+  /// Since AoQ's  function is so useful, and a base function for Object
   /// Returns a string that represents this object as a label
   string Stringify() {
-    if ( base_class == null ) return "NULL";
+    if ( base_class == null ) {
+      Throw_Exception("Class has no base (AoQ bug?)");
+      assert(0);
+    }
     return Receive_Msg(Obj("Stringify")).values[0].stringeger;
+  }
+  /// Same concept with stringify, Truthity is a base function and useful
+  /// Returns a bool that represents the truthines of this object
+  bool Truthity() {
+    if ( base_class == null ) {
+      Throw_Exception("Class has no base (AoQ bug?)");
+      assert(0);
+    }
+    return Receive_Msg(Obj("Truthity")).values[0].booleaner;
   }
 }

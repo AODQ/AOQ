@@ -13,7 +13,7 @@ import AOQ.Types;
 // }
 
 Class[] classes = [];
-// ClassString[int] classes_indices = [];
+Class[] symbol_classes = [];
 
 struct Class {
 public:
@@ -40,16 +40,57 @@ public:
   }
 }
 
+mixin template Integer_Message_Table_T3(alias r, alias s,
+                                        alias func, string sign) {
+  Obj Execute_Fn() {
+    // Size must be one, element must be valid
+    if ( s.base_class.value_types.length != 1 )
+      Throw_Exception(r, s, sign);
+    switch ( s.base_class.value_types[0] ) {
+      default: assert(0);
+      case SymbolType.stringeger:
+        Throw_Exception(r, s, sign);
+        assert(0);
+      case SymbolType.booleaner:
+        return Obj(func(r.values[0].integer, cast(int)s.values[0].booleaner));
+      case SymbolType.integer:
+        return Obj(func(r.values[0].integer, s.values[0].integer));
+      case SymbolType.floateger:
+        return Obj(func(r.values[0].integer, s.values[0].floateger));
+      case SymbolType.object:
+        // Don't know how to handle this! Let the object do it!
+        return s.Receive_Msg(Obj(sign), r);
+    }
+    assert(0);
+  }
+}
+
+mixin template Floateger_Message_Table_T3(alias r, alias s,
+                                        alias func, string sign) {
+  Obj Execute_Fn() {
+    // Size must be one, element must be valid
+    if ( s.base_class.value_types.length != 1 )
+      Throw_Exception(r, s, sign);
+    switch ( s.base_class.value_types[0] ) {
+      default: assert(0);
+      case SymbolType.stringeger:
+        Throw_Exception(r, s, sign);
+        assert(0);
+      case SymbolType.integer:
+        return Obj(func(r.values[0].floateger, s.values[0].integer));
+      case SymbolType.floateger:
+        return Obj(func(r.values[0].floateger, s.values[0].floateger));
+      case SymbolType.object:
+        // Don't know how to handle this! Let the object do it!
+        return s.Receive_Msg(Obj(sign), r);
+    }
+    assert(0);
+  }
+}
+
 
 void Construct_Default_Classes() {
-  classes.length = SymbolType.max+1;
-  // classes_indices = [
-  //   "Object",
-  //   "Nil",
-  //   "Integer",
-  //   "+",
-  //   "Stringeger"
-  // ];
+  classes.length = DefaultClass.max+1;
   { // base_object
     auto _base_object = Class("object");
     _base_object.message_table_2 = [
@@ -58,6 +99,9 @@ void Construct_Default_Classes() {
       },
       "Stringify"      : function(Obj r) {
         return Obj(r.base_class.class_name);
+      },
+      "Truthity"       : function(Obj r) {
+        return Obj(false);
       }
     ];
     _base_object.message_table_3 = [
@@ -71,10 +115,18 @@ void Construct_Default_Classes() {
   { // nil
     auto _nil = _base;
     _nil.class_name = "null";
-    classes[DefaultClass.nil] = _nil;
     _nil.message_table_2["Stringify"] = function(Obj r) {
       return Obj("nil");
     };
+    classes[DefaultClass.nil] = _nil;
+  }
+  { // booleaner
+    auto _bool = _base;
+    _bool.class_name = "Bool";
+    _bool.message_table_2["Stringify"] = function(Obj r) {
+      return Obj(r.values[0].booleaner == true ? "True" : "False");
+    };
+    classes[DefaultClass.booleaner] = _bool;
   }
   { // integer
     auto _int = _base;
@@ -87,46 +139,103 @@ void Construct_Default_Classes() {
       import std.conv : to;
       return Obj(to!string(r.values[0].integer));
     };
+    _int.message_table_2["Truthity"]  = function(Obj r) {
+      return Obj(cast(bool)(r.values[0].integer != 0));
+    };
+
+    // TODO: Possibly benchmark this to see how slow it is compared to not
+    // using a template mixin
+
     _int.message_table_3["+"] = function(Obj r, Obj s) {
-      NonAOQFunc.Fn_Value_Length_Match(r, s);
-      foreach ( i; 0 .. r.values.length ) {
-        NonAOQFunc.Fn_Compatible_Values(r, s, i, i, "Op_Add");
-        auto receiver_type = r.base_class.value_types[i],
-             sender_type   = s.base_class.value_types[i];
-        // TODO: use a mixin to generalize this
-        switch ( receiver_type ) {
-          default: assert(0);
-          case SymbolType.integer:
-            switch ( sender_type ) {
-              default: assert(0);
-              case SymbolType.integer:
-                r.values[i].integer += s.values[i].integer;
-              break;
-            }
-          break;
-        }
-      }
-      return r;
+      auto f_add = function(float _r, float _s) { return _r + _s; };
+      mixin Integer_Message_Table_T3!(r, s, f_add, "+");
+      return Execute_Fn();
     };
     _int.message_table_3["-"] = function(Obj r, Obj s) {
-      NonAOQFunc.Fn_Value_Length_Match(r, s);
-      foreach ( i; 0 .. r.values.length ) {
-        if ( NonAOQFunc.Fn_Compatible_Values(r, s, i, i, "Op_Sub") ) {
-          r.values[i].integer += s.values[i].integer;
-        }
-      }
-      return r;
+      auto f_sub = function(float _r, float _s) { return _r - _s; };
+      mixin Integer_Message_Table_T3!(r, s, f_sub, "-");
+      return Execute_Fn();
+    };
+    _int.message_table_3["/"] = function(Obj r, Obj s) {
+      auto f_div = function(float _r, float _s) {return cast(float)(_r / _s);};
+      mixin Integer_Message_Table_T3!(r, s, f_div, "/");
+      return Execute_Fn();
+    };
+    _int.message_table_3["\\"] = function(Obj r, Obj s) {
+      auto f_div = function(float _r, float _s) {return cast(int)(_r / _s);};
+      mixin Floateger_Message_Table_T3!(r, s, f_div, "/");
+      return Execute_Fn();
+    };
+    _int.message_table_3["//"] = function(Obj r, Obj s) {
+      auto f_mod = function(float _r, float _s) {
+                     return cast(int)_r % cast(int)_s;
+                   };
+      mixin Integer_Message_Table_T3!(r, s, f_mod, "//");
+      return Execute_Fn();
+    };
+    _int.message_table_3["*"] = function(Obj r, Obj s) {
+      auto f_ast = function(float _r, float _s) { return _r * _s; };
+      mixin Integer_Message_Table_T3!(r, s, f_ast, "*");
+      return Execute_Fn();
+    };
+    _int.message_table_3["If"] = function(Obj r, Obj s) {
+      if ( r.Truthity() )
+        return s;
+      return Obj(SymbolType.nil);
     };
     classes[DefaultClass.integer] = _int;
   }
-  { // symbol + (TODO: expand to allow - etc)
+  {
+    auto _float = classes[DefaultClass.integer];
+    _float.class_name = "floateger";
+    _float.value_types = [SymbolType.floateger];
+    // -- define functions
+    _float.message_table_2["Stringify"] = function(Obj r) {
+      import std.conv : to;
+      return Obj(to!string(r.values[0].floateger));
+    };
+    _float.message_table_2["Truthity"]  = function(Obj r) {
+      // TODO: make abs function
+      return Obj(r.values[0].floateger < float.epsilon);
+    };
+    _float.message_table_3["+"] = function(Obj r, Obj s) {
+      auto f_add = function(float _r, float _s) { return _r + _s; };
+      mixin Floateger_Message_Table_T3!(r, s, f_add, "+");
+      return Execute_Fn();
+    };
+    _float.message_table_3["-"] = function(Obj r, Obj s) {
+      auto f_sub = function(float _r, float _s) { return _r - _s; };
+      mixin Floateger_Message_Table_T3!(r, s, f_sub, "-");
+      return Execute_Fn();
+    };
+    _float.message_table_3["/"] = function(Obj r, Obj s) {
+      auto f_div = function(float _r, float _s) {return cast(float)(_r / _s);};
+      mixin Floateger_Message_Table_T3!(r, s, f_div, "/");
+      return Execute_Fn();
+    };
+    _float.message_table_3["\\"] = function(Obj r, Obj s) {
+      auto f_div = function(float _r, float _s) {return cast(int)(_r / _s);};
+      mixin Floateger_Message_Table_T3!(r, s, f_div, "\\");
+      return Execute_Fn();
+    };
+    _float.message_table_3.remove("//");
+    _float.message_table_3["*"] = function(Obj r, Obj s) {
+      auto f_ast = function(float _r, float _s) { return _r * _s; };
+      mixin Floateger_Message_Table_T3!(r, s, f_ast, "*");
+      return Execute_Fn();
+    };
+    classes[DefaultClass.floateger] = _float;
+  }
+  { // symbol
     auto _symbol = _base;
-    _symbol.class_name = "+";
+    _symbol.class_name = "Symbol";
     _symbol.message_table_2["Stringify"] = function(Obj r) {
       auto e = Obj(r.base_class.class_name);
       return e;
     };
     classes[DefaultClass.symbol] = _symbol;
+    // can construct symbol classes now that we have a symbol
+    Construct_Default_Symbol_Classes();
   }
   { // stringeger
     auto _str = _base;
@@ -139,15 +248,66 @@ void Construct_Default_Classes() {
     };
     classes[DefaultClass.stringeger] = _str;
   }
-  // -- set to classes
-  // { // boolean
-  //   // auto _bool = Class("boolean");
-  //   // _bool.value_names = [Default_base_value_name: SymbolType.boolean];
-  //   // classes ~= _bool;
-  //   // _bool.message_table_3["="]
-  // }
-  // { // float
-  //   // auto 
-  // }
-  // { // list
+}
+
+
+void Construct_Default_Symbol_Classes() {
+  auto symbol = classes[DefaultClass.symbol];
+  symbol_classes.length = DefaultMessageClass.max + 1;
+  { // +
+    auto _plus = symbol;
+    _plus.class_name = "+";
+    symbol_classes[DefaultMessageClass.plus] = _plus;
+  }
+  { // -
+    auto _minus = symbol;
+    _minus.class_name = "-";
+    symbol_classes[DefaultMessageClass.minus] = _minus;
+  }
+  { // /
+    auto _slash = symbol;
+    _slash.class_name = "/";
+    // _slash.message_table_2["/"] = function(Obj r) {
+    //   // // convert to modulo
+    //   // auto o = r;
+    //   // o.message_table_2["Stringify"] = function(Obj r) {
+    //   //   return "//";
+    //   // };
+    //   // return o;
+    //   return Obj();
+    // };
+    symbol_classes[DefaultMessageClass.slash] = _slash;
+  }
+  { // //
+  }
+  { // *
+    auto _asterik = symbol;
+    _asterik.class_name = "*";
+    symbol_classes[DefaultMessageClass.asterik] = _asterik;
+  }
+  { // %
+    auto _percent = symbol;
+    _percent.class_name = "%";
+    symbol_classes[DefaultMessageClass.percent] = _percent;
+  }
+  { // ~
+    auto _tilde = symbol;
+    _tilde.class_name = "~";
+    symbol_classes[DefaultMessageClass.tilde] = _tilde;
+  }
+  { // \
+    auto _bslash = symbol;
+    _bslash.class_name = "\\";
+    symbol_classes[DefaultMessageClass.bslash] = _bslash;
+  }
+  { // Stringify
+    auto _stringify = symbol;
+    _stringify.class_name = "Stringify";
+    symbol_classes[DefaultMessageClass.stringify] = _stringify;
+  }
+  { // If
+    auto __if = symbol;
+    __if.class_name = "If";
+    symbol_classes[DefaultMessageClass._if] = __if;
+  }
 }
