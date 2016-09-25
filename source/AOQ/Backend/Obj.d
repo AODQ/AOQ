@@ -128,10 +128,7 @@ public:
   /// Since AoQ's  function is so useful, and a base function for Object
   /// Returns a string that represents this object as a label
   string Stringify() {
-    if ( base_class == null ) {
-      Throw_Exception("Class has no base (AoQ bug?)");
-      assert(0);
-    }
+    if ( base_class == null ) return "NULL";
     return Receive_Msg(Obj("Stringify")).values[0].stringeger;
   }
   /// Same concept with stringify, Truthity is a base function and useful

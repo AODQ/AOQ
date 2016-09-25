@@ -5,9 +5,13 @@ import AOQ.Backend.Obj;
 ParseTree Generate_Parse_Tree(string str) {
   import std.stdio : writeln;
   ParseTree tree = new ParseTree;
-  // writeln("------------ tree BEFORE  ------------");
-  // writeln(cast(string)tree);
-  // writeln("--------------------------------------");
+  writeln("------------ tree BEFORE  ------------");
+  writeln(cast(string)tree);
+  writeln("--------------------------------------");
+  { // ---  DEBUG ---
+    import std.stdio;
+    writeln("HEAD: ", &tree.root, "\nCURRENT: ", &tree.current);
+  } // --- EDEBUG ---
   ulong start_pos = 0;
   bool is_on_word = false;
   foreach ( i ; 0 .. str.length ) {
@@ -37,9 +41,9 @@ ParseTree Generate_Parse_Tree(string str) {
         tree.Set_Node_Info(str[start_pos .. i]);
         // writeln("Setting Node: ", tree.R_Current_ParseNode_String);
       }
-      // writeln("------------ tree diagram ------------");
-      // writeln(cast(string)tree);
-      // writeln("--------------------------------------");
+      writeln("------------ tree diagram ------------");
+      writeln(cast(string)tree);
+      writeln("--------------------------------------");
       is_on_word = false;
     }
   }
@@ -159,6 +163,10 @@ public:
   } body {
     auto n = new ParseNode();
     n.node_parent = current;
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln(n);
+    } // --- EDEBUG ---
     if        ( current.node_receiver is null ) {
       current = current.node_receiver = n;
     } else if ( current.node_sender   is null ) {
