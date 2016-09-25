@@ -46,7 +46,7 @@ void Interpret_File() {
          AOQ.Types;
   import AOQ.Backend.Class, AOQ.Backend.Obj;
 
-  // std.stdio.writeln(main_tree.Evaluate().Stringify());
+  std.stdio.writeln(main_tree.Evaluate().Stringify());
 
   //   auto result = r.Receive_Msg(s, m);
   //   std.stdio.writeln("RETURN VALUE: ", result);

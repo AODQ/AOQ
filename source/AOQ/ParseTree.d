@@ -96,6 +96,17 @@ class ParseNode {
       n_list[$-1].Print(n_prefix, true, o);
     }
   }
+
+  Obj Evaluate() {
+    if ( node_receiver is null ) // leaf
+      return data;
+    auto receiver = node_receiver.Evaluate();
+    if ( node_sender   is null ) // R < M
+      return receiver.Receive_Msg(data);
+    // R < M < D
+    auto sender = node_sender.Evaluate();
+    return receiver.Receive_Msg(sender, data);
+  }
 }
 
 class ParseTree {
@@ -147,8 +158,16 @@ public:
     auto n = new ParseNode();
     n.node_parent = current;
     if        ( current.node_receiver is null ) {
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln("Replacing Receiver");
+    } // --- EDEBUG ---
       current = current.node_receiver = n;
     } else if ( current.node_sender   is null ) {
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln("Replacing Sender");
+    } // --- EDEBUG ---
       current = current.node_sender = n;
     } else {
       throw new Exception("Failed to deepen, nowhere to go");
@@ -161,9 +180,8 @@ public:
     current = current.node_parent;
   }
 
-  void Next() {
-    Up();
-    Down();
+  Obj Evaluate() {
+    return root.Evaluate();
   }
 
   void Set_Node_Info(string sym) in {
@@ -192,18 +210,22 @@ public:
     // --- symbol parsed, now set the type and convert the symbol
     //     to the correct data
     import std.conv : to;
-    // if ( vinteger ) {
-    //   type = SymbolType.integer;
-    //   data.integer = to!int(sym);
-    // } else if ( vfloateger ) {
-    //   type = SymbolType.floateger;
-    //   data.floateger = to!float(sym);
-    // } else if ( vvariable || vsymbol ) {
-    //   type = SymbolType.object;
-    //   data.stringeger = sym;
-    // } else {
-    //   Parse_Err("Unable to interpret symbol: " ~ sym);
-    // }
-    current.data = Obj(sym);
+    if ( vinteger ) {
+      root.data = Obj(to!int(sym));
+    } else if ( vfloateger ) {
+      root.data = Obj(to!float(sym));
+    } else if ( vvariable || vsymbol ) {
+      root.data = Obj(sym);
+      // ---- interpret into global objects ----
+      import AOQ.Backend.Class;
+      switch ( sym ) {
+        default: break;
+        case "+":
+          root.data = Obj(&classes[DefaultClass.symbol]);
+        break;
+      }
+    } else {
+      Parse_Err("Unable to interpret symbol: " ~ sym);
+    }
   }
 }
