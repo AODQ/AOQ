@@ -75,33 +75,68 @@ public:
   this(Class* _base_class) {
     base_class = _base_class;
     values.length = base_class.value_names.length;
-    foreach ( n ; 0 .. values.length )
-      values[n].objeger = Obj(SymbolType.object);
+    foreach ( n; 0 .. values.length ) {
+      switch ( base_class.value_types[n] ) {
+        default: assert(0);
+        case SymbolType.integer:
+          values[n].integer = 0;
+        break;
+        case SymbolType.floateger:
+          values[n].floateger = 0.0f;
+        break;
+        case SymbolType.stringeger:
+          values[n].stringeger = "";
+        break;
+        // case SymbolType.object:
+        //   values[n] = Ob
+        // break;
+      }
+    }
+  }
+  static Obj Construct_Class(DefaultClass _class) {
+    return Obj(&classes[_class]);
+  }
+  static Obj Construct_Class(Obj[] i) {
+    auto obj = Obj();
+    obj.base_class = &classes[DefaultClass.array];
+    obj.values.length = 1;
+    obj.values[0].array = i;
+    return obj;
+  }
+  static Obj Construct_Class(DefaultMessageClass _class) {
+    return Obj(&symbol_classes[_class]);
   }
   static Obj Construct_Default() {
     return Obj(&classes[DefaultClass.nil]);
   }
   Obj Receive_Msg(Obj context) {
     auto msg_name = context.Call_Function("Stringify");
-    { // ---  DEBUG ---
-      import std.stdio;
-      // writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
-    } // --- EDEBUG ---
+    // { // ---  DEBUG ---
+    //   import std.stdio;
+    //   writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
+    // } // --- EDEBUG ---
     return Call_Function(msg_name.values[0].stringeger);
   }
   Obj Receive_Msg(Obj sender, Obj context) {
     auto msg_name = context.Call_Function("Stringify");
-    { // ---  DEBUG ---
-      import std.stdio;
-      // writeln("RECEIVED MESSAGE: ", msg_name);
-      // writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
-    } // --- EDEBUG ---
+    // { // ---  DEBUG ---
+    //   import std.stdio;
+    //   writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
+    // } // --- EDEBUG ---
     return Call_Function(msg_name.values[0].stringeger, sender);
   }
   import AOQ.Backend.Exception;
   /// Checks that functions exists and then calls it
-  Obj Call_Function(string fn_name) {
-    auto loc = (fn_name in base_class.message_table_2);
+  Obj Call_Function(string label) {
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln(base_class);
+    } // --- EDEBUG ---
+    auto loc = (label in base_class.message_table_2);
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln(base_class.message_table_2);
+    } // --- EDEBUG ---
     { // ---  DEBUG ---
       import std.stdio;
       // writeln("CALLING FN: ", base_class.message_table_2);
@@ -109,15 +144,18 @@ public:
     if ( loc !is null ) {
       return (*loc)(this);
     }
-    Throw_Exception("Calling non-existent function: " ~ fn_name);
+    Throw_Exception("Message '" ~ label ~
+                    "' undefined for '" ~ base_class.class_name ~ "'");
     return Obj();
   }
   /// Checks that functions exists and then calls it
-  Obj Call_Function(string fn_name, Obj s) {
-    auto loc = (fn_name in base_class.message_table_3);
+  Obj Call_Function(string label, Obj s) {
+    auto loc = (label in base_class.message_table_3);
     if ( loc !is null )
       return (*loc)(this, s);
-    Throw_Exception("Calling non-existent function: " ~ fn_name);
+    Throw_Exception("Message '" ~ label ~
+                    "' undefined for '" ~ base_class.class_name ~ "' from '" ~
+                    s.base_class.class_name ~ "'");
     return Obj();
   }
   string R_String_Value(ulong index) {
@@ -129,6 +167,10 @@ public:
   /// Returns a string that represents this object as a label
   string Stringify() {
     if ( base_class == null ) return "NULL";
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln(base_class.class_name);
+    } // --- EDEBUG ---
     return Receive_Msg(Obj("Stringify")).values[0].stringeger;
   }
   /// Same concept with stringify, Truthity is a base function and useful
@@ -139,5 +181,9 @@ public:
       assert(0);
     }
     return Receive_Msg(Obj("Truthity")).values[0].booleaner;
+  }
+  Obj Cast(T)(T castee_class) {
+    Obj castee = Obj(castee_class);
+    return Call_Function("Cast", castee);
   }
 }

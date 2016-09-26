@@ -101,12 +101,35 @@ void Construct_Default_Classes() {
         return Obj(r.base_class.class_name);
       },
       "Truthity"       : function(Obj r) {
-        return Obj(false);
+        return Obj(true);
+      },
+      "Print"          : function(Obj r) {
+        import std.stdio : writeln;
+        writeln(r.base_class.class_name);
+        return r;
+      },
+      "."           : function(Obj r) {
+        return r;
       }
     ];
     _base_object.message_table_3 = [
-      "!"  : function(Obj r, Obj s) {
-        return Obj();
+      "If"             : function(Obj r, Obj s) {
+        if ( r.Truthity() )
+          return s;
+        return Obj(SymbolType.nil);
+      },
+      "^"              : function(Obj r, Obj s) {
+        if ( r.Truthity() )
+          return r;
+        return s;
+      },
+      "Cast"           : function(Obj r, Obj s) {
+        if ( r.Stringify() == s.Stringify() ) {
+          return r;
+        }
+        Throw_Exception("Unknown cast from " ~ r.Stringify() ~
+                                      " to " ~ s.Stringify());
+        assert(0);
       }
     ];
     classes[DefaultClass.object] = _base_object;
@@ -114,10 +137,13 @@ void Construct_Default_Classes() {
   auto _base = classes[0];
   { // nil
     auto _nil = _base;
-    _nil.class_name = "null";
-    _nil.message_table_2["Stringify"] = function(Obj r) {
-      return Obj("nil");
+    _nil.class_name = "nil";
+    _nil.message_table_2["Is"] = function(Obj r) {
+      return Obj(false);
     };
+    _nil.message_table_2["Truthity"] = function(Obj r) {
+      return Obj(false);
+    },
     classes[DefaultClass.nil] = _nil;
   }
   { // booleaner
@@ -127,6 +153,40 @@ void Construct_Default_Classes() {
       return Obj(r.values[0].booleaner == true ? "True" : "False");
     };
     classes[DefaultClass.booleaner] = _bool;
+  }
+  { // array
+    auto _array = _base;
+    _array.class_name = "Array";
+    _array.value_indices = [Default_base_value_name: 0];
+    _array.value_names   = [Default_base_value_name];
+    _array.value_types   = [SymbolType.array];
+    _array.message_table_2["Stringify"] = function(Obj r) {
+      string str = "";
+      auto arr = r.values[0].array;
+      foreach ( n; arr ) {
+        str ~= n.Stringify();
+      }
+      return Obj(str);
+    };
+    _array.message_table_2["Truthity"] = function(Obj r) {
+      return Obj(r.values[0].array.length != 0);
+    };
+    _array.message_table_2["Print"] = function(Obj r) {
+      string str = "[";
+      auto arr = r.values[0].array;
+      if ( arr.length > 0 ) {
+        foreach ( n; 0 .. arr.length - 1 ) {
+          str ~= " " ~ arr[n].Stringify() ~ ",";
+        }
+        str ~= " " ~ arr[$-1].Stringify();
+      }
+      str ~= " ]";
+      return Obj(str);
+    };
+
+    _array.message_table_3["~"] = function(Obj r, Obj s) {
+       return Obj.Construct_Class(r.values[0].array ~ s);
+    };
   }
   { // integer
     auto _int = _base;
@@ -141,6 +201,11 @@ void Construct_Default_Classes() {
     };
     _int.message_table_2["Truthity"]  = function(Obj r) {
       return Obj(cast(bool)(r.values[0].integer != 0));
+    };
+    _int.message_table_2["Print"] = function(Obj r) {
+      import std.stdio : writeln;
+      writeln(r.values[0].integer);
+      return r;
     };
 
     // TODO: Possibly benchmark this to see how slow it is compared to not
@@ -178,10 +243,14 @@ void Construct_Default_Classes() {
       mixin Integer_Message_Table_T3!(r, s, f_ast, "*");
       return Execute_Fn();
     };
-    _int.message_table_3["If"] = function(Obj r, Obj s) {
-      if ( r.Truthity() )
-        return s;
-      return Obj(SymbolType.nil);
+    _int.message_table_3["Range"] = function(Obj r, Obj s) {
+      // R = low S = hi
+      auto _range = Obj.Construct_Class(DefaultMessageClass.range);
+      // TODO: needs a constructor of some sorts
+      // TODO: Also needs to verify this is an integer
+      _range.values[0].integer = r.values[0].integer;
+      _range.values[1].integer = s.values[0].integer;
+      return _range;
     };
     classes[DefaultClass.integer] = _int;
   }
@@ -246,8 +315,11 @@ void Construct_Default_Classes() {
     _str.message_table_2["Stringify"] = function(Obj r) {
       return r;
     };
-    classes[DefaultClass.stringeger] = _str;
+    _str.message_table_3["~"]         = function(Obj r, Obj s) {
+      return Obj(r.Stringify() ~ s.Stringify());
+    };
   }
+  
 }
 
 
@@ -259,6 +331,7 @@ void Construct_Default_Symbol_Classes() {
     _plus.class_name = "+";
     symbol_classes[DefaultMessageClass.plus] = _plus;
   }
+
   { // -
     auto _minus = symbol;
     _minus.class_name = "-";
@@ -295,10 +368,20 @@ void Construct_Default_Symbol_Classes() {
     _tilde.class_name = "~";
     symbol_classes[DefaultMessageClass.tilde] = _tilde;
   }
+  { // ^
+    auto __caret = symbol;
+    __caret.class_name = "^";
+    symbol_classes[DefaultMessageClass.caret] = __caret;
+  }
   { // \
     auto _bslash = symbol;
     _bslash.class_name = "\\";
     symbol_classes[DefaultMessageClass.bslash] = _bslash;
+  }
+  { // dot
+    auto _dot = symbol;
+    _dot.class_name = ".";
+    symbol_classes[DefaultMessageClass.dot] = _dot;
   }
   { // Stringify
     auto _stringify = symbol;
@@ -309,5 +392,61 @@ void Construct_Default_Symbol_Classes() {
     auto __if = symbol;
     __if.class_name = "If";
     symbol_classes[DefaultMessageClass._if] = __if;
+  }
+  { // loop
+    auto _loop = symbol;
+    _loop.class_name = "Loop";
+    symbol_classes[DefaultMessageClass.loop] = _loop;
+  }
+  { // loop
+    auto _loop = symbol;
+    _loop.class_name = "Loop_Sum";
+    symbol_classes[DefaultMessageClass.loop_sum] = _loop;
+  }
+  { // range
+    auto _range = symbol;
+    _range.class_name = "Range";
+    _range.value_indices = ["low" : 0,
+                            "high": 1];
+    _range.value_names   = ["low", "high"];
+    _range.value_types   = [SymbolType.integer, SymbolType.integer];
+    _range.message_table_3["Loop_Sum"] = function(Obj r, Obj s) {
+      int low = r.values[0].integer,
+          hi  = r.values[1].integer;
+      if ( low >= hi )
+        return Obj(0);
+      Obj sum;
+      foreach ( it; low .. hi ) {
+        Obj nval = Obj(it).Receive_Msg(s);
+        if ( it == low )
+          sum = nval;
+        else {
+          // { // ---  DEBUG ---
+          //   import std.stdio;
+          //   writeln("Adding ", sum.base_class.class_name, " (", sum.Stringify,
+          //           ") with ", nval.base_class.class_name, " (",
+          //           nval.Stringify, ")");
+          // } // --- EDEBUG ---
+          sum = sum.Receive_Msg(nval, Obj("+"));
+          // { // ---  DEBUG ---
+          //   import std.stdio;
+          //   writeln("New sum: ", sum.base_class.class_name, " (", sum.Stringify,
+          //           ")");
+          // } // --- EDEBUG ---
+        }
+      }
+      return sum;
+    };
+    _range.message_table_3["Loop"] = function(Obj r, Obj s) {
+      int low = r.values[0].integer,
+          hi  = r.values[1].integer;
+      if ( low >= hi )
+        return Obj(0);
+      foreach ( it; low .. hi ) {
+        Obj(it).Receive_Msg(s);
+      }
+      return Obj(SymbolType.nil);
+    };
+    symbol_classes[DefaultMessageClass.range] = _range;
   }
 }

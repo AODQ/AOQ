@@ -23,17 +23,6 @@ void Translate_File(string filename) {
   import std.stdio : writeln;
   writeln("Generating parse tree");
   main_tree = Generate_Parse_Tree(file);
-
-  // auto c = new Context(file, it);
-  // std.stdio.writeln("---- parsed contexts ----");
-  // c.Output();
-  // std.stdio.writeln("---- created contexts, now parse symbols ----");
-  // auto e = c.Parse();
-  // std.stdio.writeln("---- parsed symbols ----");
-  // std.stdio.writeln(e);
-  // foreach ( el ; e )
-  //   el.Output();
-  // symbol_table = e;
 }
 
 void Interpret_File() {
@@ -45,14 +34,13 @@ void Interpret_File() {
          AOQ.Parser.Util,
          AOQ.Types;
   import AOQ.Backend.Class, AOQ.Backend.Obj;
-
-  std.stdio.writeln(main_tree.Evaluate().Stringify());
-
-  //   auto result = r.Receive_Msg(s, m);
-  //   std.stdio.writeln("RETURN VALUE: ", result);
-  //   std.stdio.writeln("(STRING FORM): ",
-  //     result.Receive_Msg(Obj("Stringify")).R_String_Value(0));
-  // }
+  import core.time;
+  MonoTime aoq_before = MonoTime.currTime;
+  std.stdio.writeln("Exited successfully with: ",
+                     main_tree.Evaluate().Stringify());
+  MonoTime aoq_after  = MonoTime.currTime;
+  Duration aoq_time = aoq_after - aoq_before;
+  std.stdio.writeln("AOQ --- Time took to execute: ", aoq_time);
 }
 
 int main(string[] argv) {

@@ -7,15 +7,17 @@ enum SymbolType {
   floateger,
   stringeger,
   booleaner,
+  array,
   nil
 }
 
 union CoreDataType {
-  Obj objeger;
-  int integer;
-  bool booleaner;
-  float floateger;
+  Obj    objeger;
+  int    integer;
+  bool   booleaner;
+  float  floateger;
   string stringeger;
+  Obj[]  array;
 }
 
 
@@ -28,14 +30,15 @@ enum DefaultClass {
   stringeger,
   floateger,
   booleaner,
-  UNKNOWN
+  array,
+  UNKNOWN,
 };
 
 enum DefaultMessageClass {
   // operators ---
-  plus, minus, slash, asterik, percent, tilde, bslash,
+  plus, minus, slash, asterik, percent, tilde, bslash, caret, dot,
   // functions ---
-  stringify, _if
+  stringify, _if, loop, loop_sum, range, _cast,
 }
 
 immutable(int[string]) DefaultMessageClass_map;
@@ -45,10 +48,15 @@ static this() {
     "+":  DefaultMessageClass.plus,    "-": DefaultMessageClass.minus,
     "/": DefaultMessageClass.slash,    "*": DefaultMessageClass.asterik,
     "%": DefaultMessageClass.percent,  "~": DefaultMessageClass.tilde,
-    "\\": DefaultMessageClass.bslash,
+    "\\": DefaultMessageClass.bslash,  "^": DefaultMessageClass.caret,
+    "." : DefaultMessageClass.dot,
     // functions ---
     "Stringify": DefaultMessageClass.stringify,
-    "If":        DefaultMessageClass._if
+    "If":        DefaultMessageClass._if,
+    "Loop":      DefaultMessageClass.loop,
+    "Loop_Sum":  DefaultMessageClass.loop_sum,
+    "Range":     DefaultMessageClass.range,
+    "Cast":      DefaultMessageClass._cast,
   ];
 }
 

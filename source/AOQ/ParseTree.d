@@ -5,13 +5,6 @@ import AOQ.Backend.Obj;
 ParseTree Generate_Parse_Tree(string str) {
   import std.stdio : writeln;
   ParseTree tree = new ParseTree;
-  writeln("------------ tree BEFORE  ------------");
-  writeln(cast(string)tree);
-  writeln("--------------------------------------");
-  { // ---  DEBUG ---
-    import std.stdio;
-    writeln("HEAD: ", &tree.root, "\nCURRENT: ", &tree.current);
-  } // --- EDEBUG ---
   ulong start_pos = 0;
   bool is_on_word = false;
   foreach ( i ; 0 .. str.length ) {
@@ -21,26 +14,25 @@ ParseTree Generate_Parse_Tree(string str) {
       tree.Down();
       continue;
     } if ( str[i] == ')' ) {
-      // writeln("Tree up");
+      writeln("Tree up");
       tree.Up();
       continue;
     }
     if ( !is_on_word ) {
-      if ( str[i] != ' ' ) {
+      if ( str[i] != ' ' && str[i] != '\n' && str[i] != '\r' ) {
         start_pos = i;
-        // writeln("is on word");
+        writeln("is on word");
         is_on_word = true;
       }
     } else if ( str[i] == ' ' ) {
-      if ( tree.R_Current_ParseNode_String() != "null" ) {
-        tree.Down();
-        tree.Set_Node_Info(str[start_pos .. i]);
-        // writeln("Setting Node: ", tree.R_Current_ParseNode_String);
-        tree.Up();
-      } else {
-        tree.Set_Node_Info(str[start_pos .. i]);
-        // writeln("Setting Node: ", tree.R_Current_ParseNode_String);
-      }
+    { // ---  DEBUG ---
+      import std.stdio;
+      // writeln();
+    } // --- EDEBUG ---
+      tree.Down();
+      tree.Set_Node_Info(str[start_pos .. i]);
+      writeln("Setting Node: ", tree.R_Current_ParseNode_String);
+      tree.Up();
       writeln("------------ tree diagram ------------");
       writeln(cast(string)tree);
       writeln("--------------------------------------");
@@ -49,36 +41,16 @@ ParseTree Generate_Parse_Tree(string str) {
   }
   writeln("------------ tree diagram ------------");
   writeln(cast(string)tree);
-  writeln("--------------------------------------");
   return tree;
 }
 
 class ParseNode {
-  ParseNode node_receiver, node_sender, node_parent;
+  ParseNode node_message, node_receiver, node_sender, node_parent;
   Obj data;
 
   this() {
     import AOQ.Backend.Class;
-    data = Obj.Construct_Default();
-  }
-
-  void Set(SymbolType t, string cdt) {
-    import std.conv : to;
-    switch ( t ) {
-      default: assert(0);
-      case SymbolType.integer:
-        data = Obj(to!int(cdt));
-      break;
-      case SymbolType.floateger:
-        data = Obj(to!int(cdt));
-      break;
-      case SymbolType.stringeger:
-        data = Obj(to!int(cdt));
-      break;
-      case SymbolType.object:
-        data = Obj(to!int(cdt));
-      break;
-    }
+    data = Obj.Construct_Class(DefaultMessageClass.dot);
   }
 
   // Adapted from Vasya Novikov's submission
@@ -91,9 +63,16 @@ class ParseNode {
 
   private void Print ( string prefix, bool tail, ref string o ) {
     import std.stdio : writeln;
-    o ~= prefix ~ (tail ? "└── " : "├── ") ~ data.Stringify() ~ '\n';
-    auto n_prefix = prefix ~ (tail ? "   " : "|   ");
+    o ~= prefix ~ (tail ? "└──" : "├──");
+    if ( data.Stringify() == "." ) {
+      o ~= ".";
+    } else {
+      o ~= " " ~ data.Stringify();
+    }
+    o ~= '\n';
+    auto n_prefix = prefix ~ (tail ? "   " : "|  ");
     ParseNode[] n_list;
+    if ( node_message  !is null ) n_list ~= node_message;
     if ( node_receiver !is null ) n_list ~= node_receiver;
     if ( node_sender   !is null ) n_list ~= node_sender;
     if ( n_list.length != 0 ) {
@@ -104,14 +83,17 @@ class ParseNode {
   }
 
   Obj Evaluate() {
-    if ( node_receiver is null ) // leaf
+    if ( node_message is null ) // leaf
       return data;
+    auto message  = node_message.Evaluate();
+    if ( node_receiver is null )
+      return message;
     auto receiver = node_receiver.Evaluate();
     if ( node_sender   is null ) // R < M
-      return receiver.Receive_Msg(data);
+      return receiver.Receive_Msg(message);
     // R < M < D
     auto sender = node_sender.Evaluate();
-    return receiver.Receive_Msg(sender, data);
+    return receiver.Receive_Msg(sender, message);
   }
 }
 
@@ -145,13 +127,23 @@ public:
   /// Returns pretty-print version of tree
   /// Format:
   /** (* (+ 4 3) some_var) becomes
-    Stringify
+   |
+   |-- Stringify
+   |
+   '--.
+      |---.
+      |   |
+      |   '-- *
       |
-      |-- *
-          |-- +
-          |   |-- 4
-          |   '-- 3
-          '--- some_var
+      |---.
+      |   |
+      |   |-- +
+      |   |
+      |   |-- 4
+      |   |
+      |   '-- 3
+      |
+      '-- some var
   **/
   string opCast(T)() if (is(T == string)) {
     return root.Print();
@@ -163,17 +155,20 @@ public:
   } body {
     auto n = new ParseNode();
     n.node_parent = current;
-    { // ---  DEBUG ---
-      import std.stdio;
-      writeln(n);
-    } // --- EDEBUG ---
-    if        ( current.node_receiver is null ) {
+    if        ( current.node_message  is null ) {
+      current = current.node_message = n;
+    } else if ( current.node_receiver is null ) {
       current = current.node_receiver = n;
     } else if ( current.node_sender   is null ) {
       current = current.node_sender = n;
     } else {
       throw new Exception("Failed to deepen, nowhere to go");
     }
+    { // ---  DEBUG ---
+      import std.stdio;
+      writeln(n.data.base_class.class_name);
+      writeln("DOWN: ", n.data.Stringify());
+    } // --- EDEBUG ---
   }
 
   void Up() in {
@@ -200,10 +195,6 @@ public:
     vfloateger = false;
     char s0 = sym[0];
     vsymbol = sym.length == 1 && Is_Operator(s0);
-    { // ---  DEBUG ---
-      import std.stdio;
-      writeln("IS OPERATOR: ", Is_Operator(s0), " FOR: ", s0);
-    } // --- EDEBUG ---
     import std.uni : toLower;
     vvariable = toLower(s0) >= 'a' && toLower(s0) <= 'z';
     foreach ( i; sym ) {
@@ -213,7 +204,8 @@ public:
         vfloateger = true;
       }
       if ( vvariable && !((toLower(i) >= 'a' && toLower(i) <= 'z')
-                      ||  (        i  >= '1' &&         i  <= '9')))
+                      ||  (        i  >= '1' &&         i  <= '9')
+                      ||           i  == '_' ))
         vvariable = false;
     }
 
@@ -221,22 +213,10 @@ public:
     //     to the correct data
     import std.conv : to;
     if ( vinteger ) {
-      { // ---  DEBUG ---
-        import std.stdio;
-        writeln("INTEGER!");
-      } // --- EDEBUG ---
       current.data = Obj(to!int(sym));
     } else if ( vfloateger ) {
       current.data = Obj(to!float(sym));
-      { // ---  DEBUG ---
-        import std.stdio;
-        writeln("FLOATEGER!");
-      } // --- EDEBUG ---
     } else if ( vvariable || vsymbol ) {
-      { // ---  DEBUG ---
-        import std.stdio;
-        writeln("VAR OR SYM!");
-      } // --- EDEBUG ---
       current.data = Obj(sym);
       // ---- interpret into global objects ----
       import AOQ.Backend.Class;
@@ -245,13 +225,10 @@ public:
         current.data = Obj(&symbol_classes[*sym_ind]);
         { // ---  DEBUG ---
           import std.stdio;
-          writeln("Interpreted symbol: ", current.data.Stringify);
+          writeln("SET: ", current.data.Stringify);
         } // --- EDEBUG ---
       } else {
-      { // ---  DEBUG ---
-        import std.stdio;
-        writeln("Symbol not interpreted, must be variable: ", sym);
-      } // --- EDEBUG ---
+        Parse_Err("Undefined Symbol: " ~ sym);
       }
     } else {
       Parse_Err("Unable to interpret symbol: " ~ sym);
