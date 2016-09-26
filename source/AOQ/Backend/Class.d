@@ -124,12 +124,22 @@ void Construct_Default_Classes() {
         return s;
       },
       "Cast"           : function(Obj r, Obj s) {
-        if ( r.Stringify() == s.Stringify() ) {
+        auto rstr = r.Stringify,
+             sstr = s.Stringify;
+        if ( rstr == sstr ) {
           return r;
+        }
+        if ( s.Stringify == "Array" ) {
+          return Obj.Construct_Class([r]);
         }
         Throw_Exception("Unknown cast from " ~ r.Stringify() ~
                                       " to " ~ s.Stringify());
         assert(0);
+      },
+      "~"              : function(Obj r, Obj s) {
+        r = r.Receive_Msg(Obj("Array"), Obj("Cast"));
+        s = s.Receive_Msg(Obj("Array"), Obj("Cast"));
+        return r.Receive_Msg(s, Obj("~"));
       }
     ];
     classes[DefaultClass.object] = _base_object;
@@ -181,12 +191,25 @@ void Construct_Default_Classes() {
         str ~= " " ~ arr[$-1].Stringify();
       }
       str ~= " ]";
-      return Obj(str);
+      import std.stdio : writeln;
+      writeln(str);
+      return r;
     };
 
     _array.message_table_3["~"] = function(Obj r, Obj s) {
-       return Obj.Construct_Class(r.values[0].array ~ s);
+      s = s.Receive_Msg(Obj("Array"), Obj("Cast"));
+      return Obj.Construct_Class(r.values[0].array ~ s.values[0].array);
     };
+    _array.message_table_3["Cast"] = function(Obj r, Obj s) {
+      auto sstr = s.Stringify();
+      if ( sstr == "Array" ) {
+        return r;
+      }
+      Throw_Exception("Don't know how to cast " ~ r.Stringify() ~ " to " ~
+                      sstr);
+      assert(0);
+    };
+    classes[DefaultClass.array] = _array;
   }
   { // integer
     auto _int = _base;
@@ -318,8 +341,8 @@ void Construct_Default_Classes() {
     _str.message_table_3["~"]         = function(Obj r, Obj s) {
       return Obj(r.Stringify() ~ s.Stringify());
     };
+    classes[DefaultClass.stringeger] = _str;
   }
-  
 }
 
 

@@ -2,6 +2,7 @@ module AOQ.Backend.Obj;
 import std.string : string;
 import AOQ.Types;
 import AOQ.Backend.Class;
+import AOQ.Util;
 
 string CoreDataType_To_String(CoreDataType cdt, SymbolType t) {
   import std.conv : to;
@@ -93,6 +94,9 @@ public:
       }
     }
   }
+  // this(Obj[] i) {
+  //   this = Construct_Class(i);
+  // }
   static Obj Construct_Class(DefaultClass _class) {
     return Obj(&classes[_class]);
   }
@@ -110,11 +114,11 @@ public:
     return Obj(&classes[DefaultClass.nil]);
   }
   Obj Receive_Msg(Obj context) {
+    { // ---  DEBUG ---
+      import std.stdio;
+      // writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
+    } // --- EDEBUG ---
     auto msg_name = context.Call_Function("Stringify");
-    // { // ---  DEBUG ---
-    //   import std.stdio;
-    //   writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
-    // } // --- EDEBUG ---
     return Call_Function(msg_name.values[0].stringeger);
   }
   Obj Receive_Msg(Obj sender, Obj context) {
@@ -128,24 +132,11 @@ public:
   import AOQ.Backend.Exception;
   /// Checks that functions exists and then calls it
   Obj Call_Function(string label) {
-    { // ---  DEBUG ---
-      import std.stdio;
-      writeln(base_class);
-    } // --- EDEBUG ---
     auto loc = (label in base_class.message_table_2);
-    { // ---  DEBUG ---
-      import std.stdio;
-      writeln(base_class.message_table_2);
-    } // --- EDEBUG ---
-    { // ---  DEBUG ---
-      import std.stdio;
-      // writeln("CALLING FN: ", base_class.message_table_2);
-    } // --- EDEBUG ---
     if ( loc !is null ) {
       return (*loc)(this);
     }
-    Throw_Exception("Message '" ~ label ~
-                    "' undefined for '" ~ base_class.class_name ~ "'");
+    Throw_Exception("Invalid: (" ~ label ~ " " ~ Stringify ~ ")");
     return Obj();
   }
   /// Checks that functions exists and then calls it
@@ -153,9 +144,8 @@ public:
     auto loc = (label in base_class.message_table_3);
     if ( loc !is null )
       return (*loc)(this, s);
-    Throw_Exception("Message '" ~ label ~
-                    "' undefined for '" ~ base_class.class_name ~ "' from '" ~
-                    s.base_class.class_name ~ "'");
+    Throw_Exception("Invalid: (" ~ label ~ " " ~ Stringify ~ " " ~
+                    s.Stringify ~ ")");
     return Obj();
   }
   string R_String_Value(ulong index) {
@@ -167,11 +157,7 @@ public:
   /// Returns a string that represents this object as a label
   string Stringify() {
     if ( base_class == null ) return "NULL";
-    { // ---  DEBUG ---
-      import std.stdio;
-      writeln(base_class.class_name);
-    } // --- EDEBUG ---
-    return Receive_Msg(Obj("Stringify")).values[0].stringeger;
+    return Call_Function("Stringify").values[0].stringeger;
   }
   /// Same concept with stringify, Truthity is a base function and useful
   /// Returns a bool that represents the truthines of this object
@@ -181,6 +167,10 @@ public:
       assert(0);
     }
     return Receive_Msg(Obj("Truthity")).values[0].booleaner;
+  }
+  /// useful for debugging
+  void Print() {
+    Receive_Msg(Obj("Print"));
   }
   Obj Cast(T)(T castee_class) {
     Obj castee = Obj(castee_class);

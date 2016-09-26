@@ -1,6 +1,7 @@
 module AOQ.ParseTree;
 import AOQ.Types;
 import AOQ.Backend.Obj;
+import AOQ.Util;
 
 ParseTree Generate_Parse_Tree(string str) {
   import std.stdio : writeln;
@@ -10,37 +11,29 @@ ParseTree Generate_Parse_Tree(string str) {
   foreach ( i ; 0 .. str.length ) {
     // writeln("C: ", str[i]);
     if ( str[i] == '(' ) {
-      writeln("Tree down");
+      Print("Tree down");
       tree.Down();
       continue;
     } if ( str[i] == ')' ) {
-      writeln("Tree up");
+      Print("Tree up");
       tree.Up();
       continue;
     }
     if ( !is_on_word ) {
       if ( str[i] != ' ' && str[i] != '\n' && str[i] != '\r' ) {
         start_pos = i;
-        writeln("is on word");
         is_on_word = true;
       }
     } else if ( str[i] == ' ' ) {
-    { // ---  DEBUG ---
-      import std.stdio;
-      // writeln();
-    } // --- EDEBUG ---
       tree.Down();
       tree.Set_Node_Info(str[start_pos .. i]);
-      writeln("Setting Node: ", tree.R_Current_ParseNode_String);
+      Print("Setting Node: ", tree.R_Current_ParseNode_String);
       tree.Up();
-      writeln("------------ tree diagram ------------");
-      writeln(cast(string)tree);
-      writeln("--------------------------------------");
-      is_on_word = false;
+        is_on_word = false;
     }
   }
-  writeln("------------ tree diagram ------------");
-  writeln(cast(string)tree);
+  Print("------------ tree diagram ------------");
+  Print(cast(string)tree);
   return tree;
 }
 
@@ -62,7 +55,6 @@ class ParseNode {
   }
 
   private void Print ( string prefix, bool tail, ref string o ) {
-    import std.stdio : writeln;
     o ~= prefix ~ (tail ? "└──" : "├──");
     if ( data.Stringify() == "." ) {
       o ~= ".";
@@ -164,11 +156,6 @@ public:
     } else {
       throw new Exception("Failed to deepen, nowhere to go");
     }
-    { // ---  DEBUG ---
-      import std.stdio;
-      writeln(n.data.base_class.class_name);
-      writeln("DOWN: ", n.data.Stringify());
-    } // --- EDEBUG ---
   }
 
   void Up() in {
@@ -184,14 +171,10 @@ public:
   void Set_Node_Info(string sym) in {
     assert(sym.length != 0);
   } body {
-  { // ---  DEBUG ---
-    import std.stdio;
-    writeln("Setting node info for: ", sym);
-  } // --- EDEBUG ---
     // --- parse symbol to check type
     bool vinteger, vfloateger, vvariable, vsymbol;
     vinteger = vfloateger = vvariable = vsymbol = true;
-    import AOQ.Parser.Util;
+    import AOQ.Util;
     vfloateger = false;
     char s0 = sym[0];
     vsymbol = sym.length == 1 && Is_Operator(s0);
@@ -223,10 +206,6 @@ public:
       auto sym_ind = (sym in DefaultMessageClass_map);
       if ( sym_ind ) {
         current.data = Obj(&symbol_classes[*sym_ind]);
-        { // ---  DEBUG ---
-          import std.stdio;
-          writeln("SET: ", current.data.Stringify);
-        } // --- EDEBUG ---
       } else {
         Parse_Err("Undefined Symbol: " ~ sym);
       }

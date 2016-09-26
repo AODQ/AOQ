@@ -1,8 +1,7 @@
 module AOQ.Parser.Symbol;
-import AOQ.Parser.Context;
 import AOQ.Parser.Types;
 import AOQ.Types;
-import AOQ.Parser.Util;
+import AOQ.Util;
 
 Symbol[] symbol_table;
 
