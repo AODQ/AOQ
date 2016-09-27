@@ -37,8 +37,10 @@ enum DefaultClass {
 enum DefaultMessageClass {
   // operators ---
   plus, minus, slash, asterik, percent, tilde, bslash, caret, dot,
-  // functions ---
+  // standard ---
   stringify, _if, loop, loop_sum, range, _cast,
+  // class related ---
+  _class,
 }
 
 immutable(int[string]) DefaultMessageClass_map;
@@ -50,13 +52,15 @@ static this() {
     "%": DefaultMessageClass.percent,  "~": DefaultMessageClass.tilde,
     "\\": DefaultMessageClass.bslash,  "^": DefaultMessageClass.caret,
     "." : DefaultMessageClass.dot,
-    // functions ---
+    // standard ---
     "Stringify": DefaultMessageClass.stringify,
     "If":        DefaultMessageClass._if,
     "Loop":      DefaultMessageClass.loop,
     "Loop_Sum":  DefaultMessageClass.loop_sum,
     "Range":     DefaultMessageClass.range,
     "Cast":      DefaultMessageClass._cast,
+    "Class":     DefaultMessageClass._class,
+    // class related ---
   ];
 }
 

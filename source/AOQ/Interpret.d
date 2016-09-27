@@ -3,7 +3,7 @@ import AOQ.ParseTree;
 import AOQ.Backend.Obj;
 import AOQ.Util;
 
-Obj Interpret_File(ParseTree tree) {
+Obj Interpret_String(ParseTree tree) {
   import std.stdio : writeln, write;
   Print("----------------------------------------------");
   Print("---------------- interpreting ----------------");
@@ -48,7 +48,7 @@ private struct Unit_Test {
   }
 
   void Run() {
-    auto rval = Interpret_File(Translate_String(program));
+    auto rval = Interpret_String(Translate_String(program));
     import std.stdio : write, writeln;
     write(name, ": ");
     if ( rval.Stringify() != expected_result ) {

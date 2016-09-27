@@ -1,2 +1,1 @@
-( ( ^ ( If 1 + ) - ) ( + 3 5 ) ( + 5 5 ) )
-( Loop_Sum ( Range 0 10 ) . )
+( Class PE )

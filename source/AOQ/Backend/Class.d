@@ -227,7 +227,8 @@ void Construct_Default_Classes() {
     };
     _int.message_table_2["Print"] = function(Obj r) {
       import std.stdio : writeln;
-      writeln(r.values[0].integer);
+      import std.conv : to;
+      writeln(to!string(r.values[0].integer));
       return r;
     };
 
@@ -342,6 +343,14 @@ void Construct_Default_Classes() {
       return Obj(r.Stringify() ~ s.Stringify());
     };
     classes[DefaultClass.stringeger] = _str;
+  }
+  Construct_Default_Class_Related();
+}
+
+
+void Construct_Default_Class_Related() {
+  auto _base = classes[DefaultClass.object];
+  {
   }
 }
 

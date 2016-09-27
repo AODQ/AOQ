@@ -104,7 +104,7 @@ public:
   }
   this() {
     root = new ParseNode();
-    root.data = Obj("Stringify");
+    root.data = Obj(".");
     current = root;
   }
 
