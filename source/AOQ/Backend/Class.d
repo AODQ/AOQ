@@ -397,6 +397,21 @@ void Construct_Default_Class_Related() {
     // };
     symbol_classes[DefaultMessageClass._new] = __new;
   }
+  { // ClassBody
+    auto _class_body = base;
+    _class_body.class_name = "ClassBody";
+    symbol_classes[DefaultMessageClass.class_body] = _class_body;
+  }
+  { // ClassDeclaration
+    auto _class_declaration = base;
+    _class_declaration.class_name = "ClassDeclaration";
+    symbol_classes[DefaultMessageClass.class_declaration] = _class_declaration;
+  }
+  { // ClassDefinition
+    auto _class_definition = base;
+    _class_definition.class_name = "ClassDefinition";
+    symbol_classes[DefaultMessageClass.class_definition] = _class_definition;
+  }
 }
 
 

@@ -40,29 +40,33 @@ enum DefaultMessageClass {
   // standard ---
   stringify, _if, loop, loop_sum, range, _cast,
   // class related ---
-  _class, class_name, _new, class_body, class_partition,
+  _class, class_name, _new, class_body, class_declaration,
+  class_definition,
 }
 
 int[string] message_map;
 static this() {
   message_map = [
     // operators ---
-    "+":  DefaultMessageClass.plus,    "-": DefaultMessageClass.minus,
-    "/": DefaultMessageClass.slash,    "*": DefaultMessageClass.asterik,
-    "%": DefaultMessageClass.percent,  "~": DefaultMessageClass.tilde,
-    "\\": DefaultMessageClass.bslash,  "^": DefaultMessageClass.caret,
-    "." : DefaultMessageClass.dot,
+    "+":  DefaultMessageClass.plus,    "-":  DefaultMessageClass.minus,
+    "/":  DefaultMessageClass.slash,   "*":  DefaultMessageClass.asterik,
+    "%":  DefaultMessageClass.percent, "~":  DefaultMessageClass.tilde,
+    "\\": DefaultMessageClass.bslash,  "^":  DefaultMessageClass.caret,
+    "." :               DefaultMessageClass.dot,
     // standard ---
-    "Stringify": DefaultMessageClass.stringify,
-    "If":        DefaultMessageClass._if,
-    "Loop":      DefaultMessageClass.loop,
-    "LoopSum":   DefaultMessageClass.loop_sum,
-    "Range":     DefaultMessageClass.range,
-    "Cast":      DefaultMessageClass._cast,
-    "Class":     DefaultMessageClass._class,
-    "ClassName": DefaultMessageClass.class_name,
-    "New":       DefaultMessageClass._new,
+    "Stringify":        DefaultMessageClass.stringify,
+    "If":               DefaultMessageClass._if,
+    "Loop":             DefaultMessageClass.loop,
+    "LoopSum":          DefaultMessageClass.loop_sum,
+    "Range":            DefaultMessageClass.range,
+    "Cast":             DefaultMessageClass._cast,
     // class related ---
+    "Class":            DefaultMessageClass._class,
+    "ClassName":        DefaultMessageClass.class_name,
+    "New":              DefaultMessageClass._new,
+    "ClassBody":        DefaultMessageClass.class_body,
+    "ClassDeclaration": DefaultMessageClass.class_declaration,
+    "ClassDefinition":  DefaultMessageClass.class_definition,
   ];
 }
 
