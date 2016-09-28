@@ -18,7 +18,7 @@ void Command_Line_Interpreter() {
     auto str = readln();
     try {
       auto ret = Interpret_String(Translate_String(str));
-      write(ret.Stringify(), ": ");
+      write(ret.Stringify(), " (", ret.Valueify().Stringify(), "): ");
       ret.Print();
     } catch ( Exception e ) {
       writeln("Caught exception: ", e);

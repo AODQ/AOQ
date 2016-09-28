@@ -95,19 +95,19 @@ public:
     }
   }
   // this(Obj[] i) {
-  //   this = Construct_Class(i);
+  //   this = Create(i);
   // }
-  static Obj Construct_Class(DefaultClass _class) {
+  static Obj Create(DefaultClass _class) {
     return Obj(&classes[_class]);
   }
-  static Obj Construct_Class(Obj[] i) {
+  static Obj Create(Obj[] i) {
     auto obj = Obj();
     obj.base_class = &classes[DefaultClass.array];
     obj.values.length = 1;
     obj.values[0].array = i;
     return obj;
   }
-  static Obj Construct_Class(DefaultMessageClass _class) {
+  static Obj Create(DefaultMessageClass _class) {
     return Obj(&symbol_classes[_class]);
   }
   static Obj Construct_Default() {
@@ -136,7 +136,8 @@ public:
     if ( loc !is null ) {
       return (*loc)(this);
     }
-    Throw_Exception("Invalid: (" ~ label ~ " " ~ Stringify ~ ")");
+    Throw_Exception("Communication undefined: (" ~ label ~ " "
+                                                ~ Stringify ~ ")");
     return Obj();
   }
   /// Checks that functions exists and then calls it
@@ -144,8 +145,8 @@ public:
     auto loc = (label in base_class.message_table_3);
     if ( loc !is null )
       return (*loc)(this, s);
-    Throw_Exception("Invalid: (" ~ label ~ " " ~ Stringify ~ " " ~
-                    s.Stringify ~ ")");
+    Throw_Exception("Communication undefined: (" ~ label ~ " "
+                     ~ Stringify ~ " " ~ s.Stringify ~ ")");
     return Obj();
   }
   string R_String_Value(ulong index) {
@@ -153,13 +154,18 @@ public:
     return CoreDataType_To_String(values[index],
                   base_class.value_types[index]);
   }
-  /// Since AoQ's  function is so useful, and a base function for Object
   /// Returns a string that represents this object as a label
   string Stringify() {
     if ( base_class == null ) return "NULL";
     return Call_Function("Stringify").values[0].stringeger;
   }
-  /// Same concept with stringify, Truthity is a base function and useful
+  /// Returns an object that represents this object's value
+  Obj Valueify() {
+    if ( base_class == null ) {
+      Throw_Exception("Class has no base");
+    }
+    return Call_Function("Valueify");
+  }
   /// Returns a bool that represents the truthines of this object
   bool Truthity() {
     if ( base_class == null ) {

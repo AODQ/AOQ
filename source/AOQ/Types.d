@@ -40,12 +40,12 @@ enum DefaultMessageClass {
   // standard ---
   stringify, _if, loop, loop_sum, range, _cast,
   // class related ---
-  _class,
+  _class, class_name, _new, class_body, class_partition,
 }
 
-immutable(int[string]) DefaultMessageClass_map;
+int[string] message_map;
 static this() {
-  DefaultMessageClass_map = [
+  message_map = [
     // operators ---
     "+":  DefaultMessageClass.plus,    "-": DefaultMessageClass.minus,
     "/": DefaultMessageClass.slash,    "*": DefaultMessageClass.asterik,
@@ -56,10 +56,12 @@ static this() {
     "Stringify": DefaultMessageClass.stringify,
     "If":        DefaultMessageClass._if,
     "Loop":      DefaultMessageClass.loop,
-    "Loop_Sum":  DefaultMessageClass.loop_sum,
+    "LoopSum":   DefaultMessageClass.loop_sum,
     "Range":     DefaultMessageClass.range,
     "Cast":      DefaultMessageClass._cast,
     "Class":     DefaultMessageClass._class,
+    "ClassName": DefaultMessageClass.class_name,
+    "New":       DefaultMessageClass._new,
     // class related ---
   ];
 }

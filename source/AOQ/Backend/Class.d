@@ -100,6 +100,9 @@ void Construct_Default_Classes() {
       "Stringify"      : function(Obj r) {
         return Obj(r.base_class.class_name);
       },
+      "Valueify"       : function(Obj r) {
+        return Obj.Create(DefaultClass.object);
+      },
       "Truthity"       : function(Obj r) {
         return Obj(true);
       },
@@ -130,7 +133,7 @@ void Construct_Default_Classes() {
           return r;
         }
         if ( s.Stringify == "Array" ) {
-          return Obj.Construct_Class([r]);
+          return Obj.Create([r]);
         }
         Throw_Exception("Unknown cast from " ~ r.Stringify() ~
                                       " to " ~ s.Stringify());
@@ -198,7 +201,7 @@ void Construct_Default_Classes() {
 
     _array.message_table_3["~"] = function(Obj r, Obj s) {
       s = s.Receive_Msg(Obj("Array"), Obj("Cast"));
-      return Obj.Construct_Class(r.values[0].array ~ s.values[0].array);
+      return Obj.Create(r.values[0].array ~ s.values[0].array);
     };
     _array.message_table_3["Cast"] = function(Obj r, Obj s) {
       auto sstr = s.Stringify();
@@ -269,7 +272,7 @@ void Construct_Default_Classes() {
     };
     _int.message_table_3["Range"] = function(Obj r, Obj s) {
       // R = low S = hi
-      auto _range = Obj.Construct_Class(DefaultMessageClass.range);
+      auto _range = Obj.Create(DefaultMessageClass.range);
       // TODO: needs a constructor of some sorts
       // TODO: Also needs to verify this is an integer
       _range.values[0].integer = r.values[0].integer;
@@ -347,10 +350,52 @@ void Construct_Default_Classes() {
   Construct_Default_Class_Related();
 }
 
-
 void Construct_Default_Class_Related() {
-  auto _base = classes[DefaultClass.object];
-  {
+  auto base = classes[DefaultClass.object];
+  { // Class
+    auto __class = base;
+    __class.class_name = "Class";
+    __class.message_table_3["New"] = function(Obj r, Obj s) {
+      { // ---  DEBUG ---
+        import std.stdio;
+        writeln("Creating class for: ", s.Stringify, " (", s.Valueify.Stringify, ")");
+      } // --- EDEBUG ---
+      NonAOQFunc.Create_Class(s.Valueify);
+      { // ---  DEBUG ---
+        import std.stdio;
+        writeln("Created class: ", symbol_classes[$-1].class_name);
+      } // --- EDEBUG ---
+      return Obj(&symbol_classes[$-1]);
+    };
+    symbol_classes[DefaultMessageClass._class] = __class;
+  }
+  { // ClassName
+    auto _class_name = classes[DefaultClass.stringeger];
+    _class_name.message_table_2["Stringify"] = function(Obj r) {
+      return Obj("ClassName");
+    };
+    _class_name.message_table_2["Valueify"] = function(Obj r) {
+      return Obj(r.values[0].stringeger);
+    };
+    _class_name.message_table_3["New"] = function(Obj r, Obj s) {
+      auto obj = Obj.Create(DefaultMessageClass.class_name);
+      obj.values[0].stringeger = s.Stringify;
+      return obj;
+    };
+    symbol_classes[DefaultMessageClass.class_name] = _class_name;
+  }
+  { // New
+    auto __new = base;
+    __new.class_name = "New";
+    // __new.message_table_3["ClassName"] = function(Obj r, Obj s) {
+    //   auto e = Obj(&symbol_classes[DefaultMessageClass.class_name]);
+    //   return e.Receive_Msg(s, r);
+    // };
+    // __new.message_table_3["Class"] = function(Obj r, Obj s) {
+    //   auto e = Obj(&symbol_classes[DefaultMessageClass.class_name]);
+    //   return e.Receive_Msg(s, r);
+    // };
+    symbol_classes[DefaultMessageClass._new] = __new;
   }
 }
 
@@ -369,7 +414,7 @@ void Construct_Default_Symbol_Classes() {
     _minus.class_name = "-";
     symbol_classes[DefaultMessageClass.minus] = _minus;
   }
-  { // /
+  { //
     auto _slash = symbol;
     _slash.class_name = "/";
     // _slash.message_table_2["/"] = function(Obj r) {

@@ -43,7 +43,7 @@ class ParseNode {
 
   this() {
     import AOQ.Backend.Class;
-    data = Obj.Construct_Class(DefaultMessageClass.dot);
+    data = Obj.Create(DefaultMessageClass.dot);
   }
 
   // Adapted from Vasya Novikov's submission
@@ -203,7 +203,7 @@ public:
       current.data = Obj(sym);
       // ---- interpret into global objects ----
       import AOQ.Backend.Class;
-      auto sym_ind = (sym in DefaultMessageClass_map);
+      auto sym_ind = (sym in message_map);
       if ( sym_ind ) {
         current.data = Obj(&symbol_classes[*sym_ind]);
       } else {
