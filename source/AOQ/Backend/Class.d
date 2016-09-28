@@ -410,6 +410,8 @@ void Construct_Default_Class_Related() {
   { // ClassDefinition
     auto _class_definition = base;
     _class_definition.class_name = "ClassDefinition";
+    _class_definition.message_table_3["ASDF"] = function(Obj r, Obj s) {
+    }
     symbol_classes[DefaultMessageClass.class_definition] = _class_definition;
   }
 }
