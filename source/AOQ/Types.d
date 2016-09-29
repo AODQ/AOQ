@@ -31,6 +31,7 @@ enum DefaultClass {
   floateger,
   booleaner,
   array,
+  unparsed_object,
   UNKNOWN,
 };
 
@@ -40,8 +41,8 @@ enum DefaultMessageClass {
   // standard ---
   stringify, _if, loop, loop_sum, range, _cast,
   // class related ---
-  _class, class_name, _new, class_body, class_declaration,
-  class_definition,
+  _class, class_name, _new, class_message_name, class_message_params,
+  class_message_body, class_message_header,
 }
 
 int[string] message_map;
@@ -52,21 +53,22 @@ static this() {
     "/":  DefaultMessageClass.slash,   "*":  DefaultMessageClass.asterik,
     "%":  DefaultMessageClass.percent, "~":  DefaultMessageClass.tilde,
     "\\": DefaultMessageClass.bslash,  "^":  DefaultMessageClass.caret,
-    "." :               DefaultMessageClass.dot,
+    "." :                 DefaultMessageClass.dot,
     // standard ---
-    "Stringify":        DefaultMessageClass.stringify,
-    "If":               DefaultMessageClass._if,
-    "Loop":             DefaultMessageClass.loop,
-    "LoopSum":          DefaultMessageClass.loop_sum,
-    "Range":            DefaultMessageClass.range,
-    "Cast":             DefaultMessageClass._cast,
+    "Stringify":          DefaultMessageClass.stringify,
+    "If":                 DefaultMessageClass._if,
+    "Loop":               DefaultMessageClass.loop,
+    "LoopSum":            DefaultMessageClass.loop_sum,
+    "Range":              DefaultMessageClass.range,
+    "Cast":               DefaultMessageClass._cast,
     // class related ---
-    "Class":            DefaultMessageClass._class,
-    "ClassName":        DefaultMessageClass.class_name,
-    "New":              DefaultMessageClass._new,
-    "ClassBody":        DefaultMessageClass.class_body,
-    "ClassDeclaration": DefaultMessageClass.class_declaration,
-    "ClassDefinition":  DefaultMessageClass.class_definition,
+    "Class":              DefaultMessageClass._class,
+    "ClassName":          DefaultMessageClass.class_name,
+    "New":                DefaultMessageClass._new,
+    "ClassMessageName":   DefaultMessageClass.class_message_name,
+    "ClassMessageParams": DefaultMessageClass.class_message_params,
+    "ClassMessageBody":   DefaultMessageClass.class_message_body,
+    "ClassMessageHeader": DefaultMessageClass.class_message_header,
   ];
 }
 

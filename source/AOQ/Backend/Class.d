@@ -15,12 +15,21 @@ import AOQ.Types;
 Class[] classes = [];
 Class[] symbol_classes = [];
 
+private void Set_Parameters(Class* _class, string[] names,
+                                SymbolType[] symbol_types) {
+  foreach ( i; 0 .. names.length ) {
+    _class.value_indices[names[i]] = i;
+    _class.value_names ~= names[i];
+    _class.value_types ~= symbol_types[$ <= i ? $-1 : i];
+  }
+}
+
 struct Class {
 public:
-  string class_name;
-  int[string]  value_indices;
-  string[]     value_names;
-  SymbolType[] value_types;
+  string             class_name;
+  ulong[string]      value_indices;
+  string[]           value_names;
+  SymbolType[]       value_types;
   Type_msg_2[string] message_table_2;
   Type_msg_3[string] message_table_3;
 
@@ -166,6 +175,30 @@ void Construct_Default_Classes() {
       return Obj(r.values[0].booleaner == true ? "True" : "False");
     };
     classes[DefaultClass.booleaner] = _bool;
+  }
+  { // unparsed object
+    auto _unparsed_object = _base;
+    // Set_Parameters(&_unparsed_object, ["Message", "Receiver", "Sender", "Data"],
+    //               [SymbolType.objeger]);
+    // _unparsed_object.message_table_2["Valueify"] = function(Obj r) {
+    //   return r.Stringify();
+    // };
+    // _unparsed_object.message_table_2["Evaluate"] = function(Obj r) {
+    //   // --- rewrite of what's in parse tree under ParseNode.Evaluate
+    //   Obj message  = r.values[r.value_indices["Message"]],
+    //       receiver = r.values[r.value_indices["Receiver"]],
+    //       sender   = r.values[r.value_indices["Sender"]],
+      //     data     = r.values[r.value_indices["Data"]];
+      // // check if leaf, statement, one or two params
+      // if ( message == "" ) return data; // leaf
+      // Obj p_message = message.Receive_Msg("Evaluate");
+      // if ( receiver == "" ) return p_message; // statement
+      // Obj p_receiver = receiver.Receive_Msg("Evaluate");
+    //   // if ( sender == "" ) return p_receiver.Receive_Msg(p_message); // one param
+
+    //   // Obj p_sender = sender.Receive_Msg("Evaluate");
+    //   // return p_receiver.Receive_Msg(p_sender, p_message); // two param
+    // };
   }
   { // array
     auto _array = _base;
@@ -387,31 +420,49 @@ void Construct_Default_Class_Related() {
   { // New
     auto __new = base;
     __new.class_name = "New";
-    // __new.message_table_3["ClassName"] = function(Obj r, Obj s) {
-    //   auto e = Obj(&symbol_classes[DefaultMessageClass.class_name]);
-    //   return e.Receive_Msg(s, r);
-    // };
-    // __new.message_table_3["Class"] = function(Obj r, Obj s) {
-    //   auto e = Obj(&symbol_classes[DefaultMessageClass.class_name]);
-    //   return e.Receive_Msg(s, r);
-    // };
     symbol_classes[DefaultMessageClass._new] = __new;
   }
-  { // ClassBody
-    auto _class_body = base;
-    _class_body.class_name = "ClassBody";
-    symbol_classes[DefaultMessageClass.class_body] = _class_body;
-  }
-  { // ClassDeclaration
-    auto _class_declaration = base;
-    _class_declaration.class_name = "ClassDeclaration";
-    symbol_classes[DefaultMessageClass.class_declaration] = _class_declaration;
-  }
-  { // ClassDefinition
-    auto _class_definition = base;
-    _class_definition.class_name = "ClassDefinition";
-    symbol_classes[DefaultMessageClass.class_definition] = _class_definition;
-  }
+  // { // ClassMessageName
+  //   auto _class_mname = base;
+  //   _class_mname.class_name = "ClassMessageName";
+  //   _class_mname.message_table_3["+"] = function(Obj r, Obj s) {
+  //     Obj n = Obj.Create(DefaultMessageClass.class_message_header);
+  //     return n.Receive_Msg(r.Valueify(), Obj("SetMessageName"))
+  //             .Receive_Msg(s.Valueify(), Obj("SetMessageParams"));
+  //   };
+  //   symbol_classes[DefaultMessageClass.class_message_name] = _class_mname;
+  // }
+  // { // ClassMessageParams
+  //   auto _class_mparams = symbol_classes[DefaultMessageClass.class_name];
+  //   _class_mparams.class_name = "ClassMessageParams";
+  //   _class_mparams.message_table_2["Stringify"] = function(Obj r) {
+  //     return Obj("ClassMessageParams");
+  //   };
+  //   _class_mparams.message_table_3["New"] = function(Obj r) {
+  //     return r.Receive_Msg(Obj(""), "New");
+  //   };
+  //   symbol_classes[DefaultMessageClass.class_message_params] = _class_mparams;
+  // }
+  // { // ClassMessageHeader
+  //   auto _class_header = base;
+  //   Set_Parameters(&_class_header, ["MessageName", "MessageParams"],
+  //                  [SymbolType.stringeger, SymbolType.stringeger]);
+  //   _class_header.message_table_3["SetMessageName"] = function(Obj r, Obj s) {
+  //     r.values[0].stringeger = s.Stringify();
+  //     return r;
+  //   };
+  //   _class_header.message_table_3["SetMessageParams"] = function(Obj r, Obj s) {
+  //     r.values[1].stringeger = s.Stringify();
+  //     return r;
+  //   };
+  //   symbol_classes[DefaultMessageClass.class_header] = _class_header;
+  // }
+  // { // ClassMessageBody
+  //   auto _class_body = base;
+  //   _class_body.class_name = "ClassMessageBody";
+    
+  //   symbol_classes[DefaultMessageClass.class_body] = _class_body;
+  // }
 }
 
 
@@ -442,8 +493,6 @@ void Construct_Default_Symbol_Classes() {
     //   return Obj();
     // };
     symbol_classes[DefaultMessageClass.slash] = _slash;
-  }
-  { // //
   }
   { // *
     auto _asterik = symbol;
