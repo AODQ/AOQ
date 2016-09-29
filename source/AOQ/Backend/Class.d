@@ -15,12 +15,30 @@ import AOQ.Types;
 Class[] classes = [];
 Class[] symbol_classes = [];
 
+<<<<<<< Updated upstream
 struct Class {
 public:
   string class_name;
   int[string]  value_indices;
   string[]     value_names;
   SymbolType[] value_types;
+=======
+private void Set_Parameters(Class* _class, string[] names,
+                                DefaultType[] symbol_types) {
+  foreach ( i; 0 .. names.length ) {
+    _class.value_indices[names[i]] = i;
+    _class.value_names ~= names[i];
+    _class.value_types ~= symbol_types[$ <= i ? $-1 : i];
+  }
+}
+
+struct Class {
+public:
+  string             class_name;
+  ulong[string]      value_indices;
+  string[]           value_names;
+  DefaultType[]     value_types;
+>>>>>>> Stashed changes
   Type_msg_2[string] message_table_2;
   Type_msg_3[string] message_table_3;
 
@@ -48,16 +66,16 @@ mixin template Integer_Message_Table_T3(alias r, alias s,
       Throw_Exception(r, s, sign);
     switch ( s.base_class.value_types[0] ) {
       default: assert(0);
-      case SymbolType.stringeger:
+      case DefaultType.stringeger:
         Throw_Exception(r, s, sign);
         assert(0);
-      case SymbolType.booleaner:
+      case DefaultType.booleaner:
         return Obj(func(r.values[0].integer, cast(int)s.values[0].booleaner));
-      case SymbolType.integer:
+      case DefaultType.integer:
         return Obj(func(r.values[0].integer, s.values[0].integer));
-      case SymbolType.floateger:
+      case DefaultType.floateger:
         return Obj(func(r.values[0].integer, s.values[0].floateger));
-      case SymbolType.object:
+      case DefaultType.object:
         // Don't know how to handle this! Let the object do it!
         return s.Receive_Msg(Obj(sign), r);
     }
@@ -73,14 +91,14 @@ mixin template Floateger_Message_Table_T3(alias r, alias s,
       Throw_Exception(r, s, sign);
     switch ( s.base_class.value_types[0] ) {
       default: assert(0);
-      case SymbolType.stringeger:
+      case DefaultType.stringeger:
         Throw_Exception(r, s, sign);
         assert(0);
-      case SymbolType.integer:
+      case DefaultType.integer:
         return Obj(func(r.values[0].floateger, s.values[0].integer));
-      case SymbolType.floateger:
+      case DefaultType.floateger:
         return Obj(func(r.values[0].floateger, s.values[0].floateger));
-      case SymbolType.object:
+      case DefaultType.object:
         // Don't know how to handle this! Let the object do it!
         return s.Receive_Msg(Obj(sign), r);
     }
@@ -90,7 +108,7 @@ mixin template Floateger_Message_Table_T3(alias r, alias s,
 
 
 void Construct_Default_Classes() {
-  classes.length = DefaultClass.max+1;
+  classes.length = DefaultType.max+1;
   { // base_object
     auto _base_object = Class("object");
     _base_object.message_table_2 = [
@@ -101,7 +119,7 @@ void Construct_Default_Classes() {
         return Obj(r.base_class.class_name);
       },
       "Valueify"       : function(Obj r) {
-        return Obj.Create(DefaultClass.object);
+        return Obj.Create(DefaultType.object);
       },
       "Truthity"       : function(Obj r) {
         return Obj(true);
@@ -119,7 +137,7 @@ void Construct_Default_Classes() {
       "If"             : function(Obj r, Obj s) {
         if ( r.Truthity() )
           return s;
-        return Obj(SymbolType.nil);
+        return Obj(DefaultType.nil);
       },
       "^"              : function(Obj r, Obj s) {
         if ( r.Truthity() )
@@ -145,7 +163,7 @@ void Construct_Default_Classes() {
         return r.Receive_Msg(s, Obj("~"));
       }
     ];
-    classes[DefaultClass.object] = _base_object;
+    classes[DefaultType.object] = _base_object;
   }
   auto _base = classes[0];
   { // nil
@@ -157,7 +175,7 @@ void Construct_Default_Classes() {
     _nil.message_table_2["Truthity"] = function(Obj r) {
       return Obj(false);
     },
-    classes[DefaultClass.nil] = _nil;
+    classes[DefaultType.nil] = _nil;
   }
   { // booleaner
     auto _bool = _base;
@@ -165,14 +183,41 @@ void Construct_Default_Classes() {
     _bool.message_table_2["Stringify"] = function(Obj r) {
       return Obj(r.values[0].booleaner == true ? "True" : "False");
     };
-    classes[DefaultClass.booleaner] = _bool;
+    classes[DefaultType.booleaner] = _bool;
   }
+<<<<<<< Updated upstream
+=======
+  { // unparsed object
+    auto _unparsed_object = _base;
+    // Set_Parameters(&_unparsed_object, ["Message", "Receiver", "Sender", "Data"],
+    //               [DefaultType.objeger]);
+    // _unparsed_object.message_table_2["Valueify"] = function(Obj r) {
+    //   return r.Stringify();
+    // };
+    // _unparsed_object.message_table_2["Evaluate"] = function(Obj r) {
+    //   // --- rewrite of what's in parse tree under ParseNode.Evaluate
+    //   Obj message  = r.values[r.value_indices["Message"]],
+    //       receiver = r.values[r.value_indices["Receiver"]],
+    //       sender   = r.values[r.value_indices["Sender"]],
+      //     data     = r.values[r.value_indices["Data"]];
+      // // check if leaf, statement, one or two params
+      // if ( message == "" ) return data; // leaf
+      // Obj p_message = message.Receive_Msg("Evaluate");
+      // if ( receiver == "" ) return p_message; // statement
+      // Obj p_receiver = receiver.Receive_Msg("Evaluate");
+    //   // if ( sender == "" ) return p_receiver.Receive_Msg(p_message); // one param
+
+    //   // Obj p_sender = sender.Receive_Msg("Evaluate");
+    //   // return p_receiver.Receive_Msg(p_sender, p_message); // two param
+    // };
+  }
+>>>>>>> Stashed changes
   { // array
     auto _array = _base;
     _array.class_name = "Array";
     _array.value_indices = [Default_base_value_name: 0];
     _array.value_names   = [Default_base_value_name];
-    _array.value_types   = [SymbolType.array];
+    _array.value_types   = [DefaultType.array];
     _array.message_table_2["Stringify"] = function(Obj r) {
       string str = "";
       auto arr = r.values[0].array;
@@ -212,14 +257,14 @@ void Construct_Default_Classes() {
                       sstr);
       assert(0);
     };
-    classes[DefaultClass.array] = _array;
+    classes[DefaultType.array] = _array;
   }
   { // integer
     auto _int = _base;
     _int.class_name = "integer";
     _int.value_indices = [Default_base_value_name: 0];
     _int.value_names   = [Default_base_value_name];
-    _int.value_types   = [SymbolType.integer];
+    _int.value_types   = [DefaultType.integer];
     // -- define functions
     _int.message_table_2["Stringify"] = function(Obj r) {
       import std.conv : to;
@@ -279,12 +324,12 @@ void Construct_Default_Classes() {
       _range.values[1].integer = s.values[0].integer;
       return _range;
     };
-    classes[DefaultClass.integer] = _int;
+    classes[DefaultType.integer] = _int;
   }
   {
-    auto _float = classes[DefaultClass.integer];
+    auto _float = classes[DefaultType.integer];
     _float.class_name = "floateger";
-    _float.value_types = [SymbolType.floateger];
+    _float.value_types = [DefaultType.floateger];
     // -- define functions
     _float.message_table_2["Stringify"] = function(Obj r) {
       import std.conv : to;
@@ -320,7 +365,7 @@ void Construct_Default_Classes() {
       mixin Floateger_Message_Table_T3!(r, s, f_ast, "*");
       return Execute_Fn();
     };
-    classes[DefaultClass.floateger] = _float;
+    classes[DefaultType.floateger] = _float;
   }
   { // symbol
     auto _symbol = _base;
@@ -329,7 +374,7 @@ void Construct_Default_Classes() {
       auto e = Obj(r.base_class.class_name);
       return e;
     };
-    classes[DefaultClass.symbol] = _symbol;
+    classes[DefaultType.symbol] = _symbol;
     // can construct symbol classes now that we have a symbol
     Construct_Default_Symbol_Classes();
   }
@@ -338,20 +383,20 @@ void Construct_Default_Classes() {
     _str.class_name = "String";
     _str.value_indices = [Default_base_value_name: 0];
     _str.value_names   = [Default_base_value_name];
-    _str.value_types   = [SymbolType.stringeger];
+    _str.value_types   = [DefaultType.stringeger];
     _str.message_table_2["Stringify"] = function(Obj r) {
       return r;
     };
     _str.message_table_3["~"]         = function(Obj r, Obj s) {
       return Obj(r.Stringify() ~ s.Stringify());
     };
-    classes[DefaultClass.stringeger] = _str;
+    classes[DefaultType.stringeger] = _str;
   }
   Construct_Default_Class_Related();
 }
 
 void Construct_Default_Class_Related() {
-  auto base = classes[DefaultClass.object];
+  auto base = classes[DefaultType.object];
   { // Class
     auto __class = base;
     __class.class_name = "Class";
@@ -370,7 +415,7 @@ void Construct_Default_Class_Related() {
     symbol_classes[DefaultMessageClass._class] = __class;
   }
   { // ClassName
-    auto _class_name = classes[DefaultClass.stringeger];
+    auto _class_name = classes[DefaultType.stringeger];
     _class_name.message_table_2["Stringify"] = function(Obj r) {
       return Obj("ClassName");
     };
@@ -397,6 +442,7 @@ void Construct_Default_Class_Related() {
     // };
     symbol_classes[DefaultMessageClass._new] = __new;
   }
+<<<<<<< Updated upstream
   { // ClassBody
     auto _class_body = base;
     _class_body.class_name = "ClassBody";
@@ -414,11 +460,54 @@ void Construct_Default_Class_Related() {
     }
     symbol_classes[DefaultMessageClass.class_definition] = _class_definition;
   }
+=======
+  // { // ClassMessageName
+  //   auto _class_mname = base;
+  //   _class_mname.class_name = "ClassMessageName";
+  //   _class_mname.message_table_3["+"] = function(Obj r, Obj s) {
+  //     Obj n = Obj.Create(DefaultMessageClass.class_message_header);
+  //     return n.Receive_Msg(r.Valueify(), Obj("SetMessageName"))
+  //             .Receive_Msg(s.Valueify(), Obj("SetMessageParams"));
+  //   };
+  //   symbol_classes[DefaultMessageClass.class_message_name] = _class_mname;
+  // }
+  // { // ClassMessageParams
+  //   auto _class_mparams = symbol_classes[DefaultMessageClass.class_name];
+  //   _class_mparams.class_name = "ClassMessageParams";
+  //   _class_mparams.message_table_2["Stringify"] = function(Obj r) {
+  //     return Obj("ClassMessageParams");
+  //   };
+  //   _class_mparams.message_table_3["New"] = function(Obj r) {
+  //     return r.Receive_Msg(Obj(""), "New");
+  //   };
+  //   symbol_classes[DefaultMessageClass.class_message_params] = _class_mparams;
+  // }
+  // { // ClassMessageHeader
+  //   auto _class_header = base;
+  //   Set_Parameters(&_class_header, ["MessageName", "MessageParams"],
+  //                  [DefaultType.stringeger, DefaultType.stringeger]);
+  //   _class_header.message_table_3["SetMessageName"] = function(Obj r, Obj s) {
+  //     r.values[0].stringeger = s.Stringify();
+  //     return r;
+  //   };
+  //   _class_header.message_table_3["SetMessageParams"] = function(Obj r, Obj s) {
+  //     r.values[1].stringeger = s.Stringify();
+  //     return r;
+  //   };
+  //   symbol_classes[DefaultMessageClass.class_header] = _class_header;
+  // }
+  // { // ClassMessageBody
+  //   auto _class_body = base;
+  //   _class_body.class_name = "ClassMessageBody";
+    
+  //   symbol_classes[DefaultMessageClass.class_body] = _class_body;
+  // }
+>>>>>>> Stashed changes
 }
 
 
 void Construct_Default_Symbol_Classes() {
-  auto symbol = classes[DefaultClass.symbol];
+  auto symbol = classes[DefaultType.symbol];
   symbol_classes.length = DefaultMessageClass.max + 1;
   { // +
     auto _plus = symbol;
@@ -503,7 +592,7 @@ void Construct_Default_Symbol_Classes() {
     _range.value_indices = ["low" : 0,
                             "high": 1];
     _range.value_names   = ["low", "high"];
-    _range.value_types   = [SymbolType.integer, SymbolType.integer];
+    _range.value_types   = [DefaultType.integer, DefaultType.integer];
     _range.message_table_3["Loop_Sum"] = function(Obj r, Obj s) {
       int low = r.values[0].integer,
           hi  = r.values[1].integer;
@@ -539,7 +628,7 @@ void Construct_Default_Symbol_Classes() {
       foreach ( it; low .. hi ) {
         Obj(it).Receive_Msg(s);
       }
-      return Obj(SymbolType.nil);
+      return Obj(DefaultType.nil);
     };
     symbol_classes[DefaultMessageClass.range] = _range;
   }

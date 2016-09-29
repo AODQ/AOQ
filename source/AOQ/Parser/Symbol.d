@@ -8,7 +8,7 @@ Symbol[] symbol_table;
 class Symbol {
 public:
   string receiver_str, sender_str, msg_str;
-  SymbolType receiver_typ, sender_typ, msg_typ;
+  DefaultType receiver_typ, sender_typ, msg_typ;
   this(string s) {
     s = ' ' ~ s ~ ' ';
     { // ---  DEBUG ---

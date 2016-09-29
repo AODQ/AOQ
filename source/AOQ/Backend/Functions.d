@@ -8,7 +8,7 @@ import AOQ.Backend.Obj;
 struct NonAOQFunc {
 static:
   void Create_Class(Obj class_label) {
-    Class nclass = classes[DefaultClass.object];
+    Class nclass = classes[DefaultType.object];
     nclass.class_name = class_label.Stringify();
     symbol_classes ~= nclass;
   }

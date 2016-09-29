@@ -4,62 +4,97 @@ import AOQ.Types;
 import AOQ.Backend.Class;
 import AOQ.Util;
 
-string CoreDataType_To_String(CoreDataType cdt, SymbolType t) {
+string CoreDataType_To_String(CoreDataType cdt, DefaultType t) {
   import std.conv : to;
   switch ( t ) {
     default: assert(0);
-    case SymbolType.stringeger: return cdt.stringeger;
-    case SymbolType.floateger:  return to!string(cdt.floateger);
-    case SymbolType.integer:    return to!string(cdt.integer);
-    case SymbolType.object:
+    case DefaultType.stringeger: return cdt.stringeger;
+    case DefaultType.floateger:  return to!string(cdt.floateger);
+    case DefaultType.integer:    return to!string(cdt.integer);
+    case DefaultType.object:
       return cdt.objeger.Call_Function("Stringify").values[0].stringeger;
   }
 }
 
+private mixin template Make_A_Thing(string sym_type, alias obj) {
+  void Activate(int value) {
+    obj.values.length = 1;
+    mixin(`obj.values[0].`~sym_type~` = value;`);
+    Finalize_Make(obj);
+  }
+};
+
+// private mixin template Make_Func(string f) {
+//   mixin("static void Make_A_"~f~"(ref Obj obj, "~f
+// }
+
 struct Obj {
-  void Make_An_Integer(int i) {
-    base_class = &classes[DefaultClass.integer];
-    values.length = 1;
-    values[0].integer = i;
+  static void Finalize_Make(ref Obj obj) {
+    import Env = AOQ.Backend.Enviornment;
+    Env.Push_Object(new Obj(obj));
   }
-  void Make_A_Floateger(float i) {
-    base_class = &classes[DefaultClass.floateger];
-    values.length = 1;
-    values[0].floateger = i;
+  static void Make_An_Object(ref Obj obj) {
+    auto value_types = obj.base_class.value_types;
+    obj.values.length = value_types.length;
+    foreach ( i; 0 .. value_types.length ) {
+      obj.values[i].objeger = Obj.Create(DefaultType.nil);
+    }
   }
-  void Make_A_String(string str) {
-    base_class = &classes[DefaultClass.stringeger];
-    values.length = 1;
-    values[0].stringeger = str;
+  static void Make_An_Integer(ref Obj obj, int i) {
+    mixin Make_A_Thing!("integer", obj);
+    Activate(i);
   }
-  void Make_A_Bool(bool i) {
-    base_class = &classes[DefaultClass.booleaner];
-    values.length = 1;
-    values[0].booleaner = i;
+  static void Make_A_Floateger(ref Obj obj, float i) {
+    mixin Make_A_Thing!("floateger", obj);
+    Activate(i);
+  }
+  static void Make_A_String(ref Obj obj, string i) {
+    mixin Make_A_Thing!("stringeger", obj);
+    Activate(i);
+  }
+  static void Make_A_Bool(ref Obj obj, bool i) {
+    mixin Make_A_Thing!("booleaner", obj);
+    Activate(i);
   }
 public:
+  // ----- DATA -----
   Class* base_class;
   CoreDataType[] values;
 
-  this(SymbolType symbol) {
-    switch ( symbol ) {
-      case SymbolType.integer:
+  this(this) {
+    values = values.dup();
+  }
+
+  // ----- Create functions -----
+  void Create(DefaultType type) {
+    auto obj = Obj();
+    obj.base_class = &classes[cast(int)type];
+    switch ( type ) {
+      case DefaultType.integer:
         Make_An_Integer(0);
       break;
-      case SymbolType.floateger:
+      case DefaultType.floateger:
         Make_A_Floateger(0.0f);
       break;
-      case SymbolType.stringeger:
+      case DefaultType.stringeger:
         Make_A_String("");
       break;
-      case SymbolType.booleaner:
+      case DefaultType.booleaner:
         Make_A_Bool(false);
       break;
-      case SymbolType.nil:
-        base_class = &classes[DefaultClass.nil];
+      case DefaultType.objeger: case DefaultType.nil:
+
+        Make_An_Object(
+      break;
+      case DefaultType.nil:
+        base_class = &classes[DefaultType.nil];
       break;
       default: assert(0);
     }
+  }
+  // copy
+  void Create(Obj o) {
+    Finalize_Make(o);
   }
   this(string str) {
     Make_A_String(str);
@@ -79,16 +114,16 @@ public:
     foreach ( n; 0 .. values.length ) {
       switch ( base_class.value_types[n] ) {
         default: assert(0);
-        case SymbolType.integer:
+        case DefaultType.integer:
           values[n].integer = 0;
         break;
-        case SymbolType.floateger:
+        case DefaultType.floateger:
           values[n].floateger = 0.0f;
         break;
-        case SymbolType.stringeger:
+        case DefaultType.stringeger:
           values[n].stringeger = "";
         break;
-        // case SymbolType.object:
+        // case DefaultType.object:
         //   values[n] = Ob
         // break;
       }
@@ -97,12 +132,12 @@ public:
   // this(Obj[] i) {
   //   this = Create(i);
   // }
-  static Obj Create(DefaultClass _class) {
+  static Obj Create(DefaultType _class) {
     return Obj(&classes[_class]);
   }
   static Obj Create(Obj[] i) {
     auto obj = Obj();
-    obj.base_class = &classes[DefaultClass.array];
+    obj.base_class = &classes[DefaultType.array];
     obj.values.length = 1;
     obj.values[0].array = i;
     return obj;
@@ -111,7 +146,7 @@ public:
     return Obj(&symbol_classes[_class]);
   }
   static Obj Construct_Default() {
-    return Obj(&classes[DefaultClass.nil]);
+    return Obj(&classes[DefaultType.nil]);
   }
   Obj Receive_Msg(Obj context) {
     { // ---  DEBUG ---
