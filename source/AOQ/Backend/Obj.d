@@ -17,44 +17,21 @@ string CoreDataType_To_String(CoreDataType cdt, DefaultType t) {
 }
 
 private mixin template Make_A_Thing(string sym_type, alias obj) {
-  void Activate(int value) {
+  Obj* Activate(T)(T value, ref Class _class) {
+    auto obj = new Obj();
+    obj.base_class = _class;
     obj.values.length = 1;
     mixin(`obj.values[0].`~sym_type~` = value;`);
-    Finalize_Make(obj);
+    return Obj.Finalize_Make(obj);
   }
 };
 
-// private mixin template Make_Func(string f) {
-//   mixin("static void Make_A_"~f~"(ref Obj obj, "~f
-// }
-
 struct Obj {
-  static void Finalize_Make(ref Obj obj) {
+  static Obj* Finalize_Make(ref Obj obj) {
     import Env = AOQ.Backend.Enviornment;
-    Env.Push_Object(new Obj(obj));
-  }
-  static void Make_An_Object(ref Obj obj) {
-    auto value_types = obj.base_class.value_types;
-    obj.values.length = value_types.length;
-    foreach ( i; 0 .. value_types.length ) {
-      obj.values[i].objeger = Obj.Create(DefaultType.nil);
-    }
-  }
-  static void Make_An_Integer(ref Obj obj, int i) {
-    mixin Make_A_Thing!("integer", obj);
-    Activate(i);
-  }
-  static void Make_A_Floateger(ref Obj obj, float i) {
-    mixin Make_A_Thing!("floateger", obj);
-    Activate(i);
-  }
-  static void Make_A_String(ref Obj obj, string i) {
-    mixin Make_A_Thing!("stringeger", obj);
-    Activate(i);
-  }
-  static void Make_A_Bool(ref Obj obj, bool i) {
-    mixin Make_A_Thing!("booleaner", obj);
-    Activate(i);
+    Obj* obj = new Obj(obj);
+    Env.Push_Object(obj);
+    return obj;
   }
 public:
   // ----- DATA -----
@@ -71,20 +48,19 @@ public:
     obj.base_class = &classes[cast(int)type];
     switch ( type ) {
       case DefaultType.integer:
-        Make_An_Integer(0);
+        Make_An_Integer(obj, 0);
       break;
       case DefaultType.floateger:
-        Make_A_Floateger(0.0f);
+        Make_A_Floateger(obj, 0.0f);
       break;
       case DefaultType.stringeger:
-        Make_A_String("");
+        Make_A_String(obj, "");
       break;
       case DefaultType.booleaner:
-        Make_A_Bool(false);
+        Make_A_Bool(obj, false);
       break;
       case DefaultType.objeger: case DefaultType.nil:
-
-        Make_An_Object(
+        Make_An_Object(obj, obj);
       break;
       case DefaultType.nil:
         base_class = &classes[DefaultType.nil];
@@ -93,22 +69,35 @@ public:
     }
   }
   // copy
-  void Create(Obj o) {
-    Finalize_Make(o);
+  static void Make_An_Object(ref Obj obj) {
+    auto value_types = obj.base_class.value_types;
+    obj.values.length = value_types.length;
+    foreach ( i; 0 .. value_types.length ) {
+      obj.values[i].objeger = Obj.Create(DefaultType.nil);
+    }
   }
-  this(string str) {
-    Make_A_String(str);
+  static Obj* Create(int i) {
+    mixin Make_A_Thing!("integer", obj);
+    return Activate(i, DefaultType.integer);
   }
-  this(int i) {
-    Make_An_Integer(i);
+  static Obj* Create(float i) {
+    mixin Make_A_Thing!("floateger", obj);
+    return Activate(i);
   }
-  this(float i) {
-    Make_A_Floateger(i);
+  static Obj* Create(string i) {
+    mixin Make_A_Thing!("stringeger", obj);
+    return Activate(i);
   }
-  this(bool i) {
-    Make_A_Bool(i);
+  static Obj* Create(bool i) {
+    mixin Make_A_Thing!("booleaner", obj);
+    return Activate(i);
+  }
+  static Obj* Create(int i) {
+    mixin Make_A_Thing!("booleaner", obj);
+    return Activate(i);
   }
   this(Class* _base_class) {
+    Obj* obj = new Obj();
     base_class = _base_class;
     values.length = base_class.value_names.length;
     foreach ( n; 0 .. values.length ) {

@@ -29,14 +29,9 @@ enum DefaultMessageClass {
   // standard ---
   stringify, _if, loop, loop_sum, range, _cast,
   // class related ---
-<<<<<<< Updated upstream
-  _class, class_name, _new, class_body, class_declaration,
-  class_definition,
-=======
   _class, class_name, _new, class_message_name, class_message_params,
   class_message_body, class_message_header,
   unparsed_object,
->>>>>>> Stashed changes
 }
 
 int[string] message_map;

@@ -15,14 +15,6 @@ import AOQ.Types;
 Class[] classes = [];
 Class[] symbol_classes = [];
 
-<<<<<<< Updated upstream
-struct Class {
-public:
-  string class_name;
-  int[string]  value_indices;
-  string[]     value_names;
-  SymbolType[] value_types;
-=======
 private void Set_Parameters(Class* _class, string[] names,
                                 DefaultType[] symbol_types) {
   foreach ( i; 0 .. names.length ) {
@@ -38,7 +30,6 @@ public:
   ulong[string]      value_indices;
   string[]           value_names;
   DefaultType[]     value_types;
->>>>>>> Stashed changes
   Type_msg_2[string] message_table_2;
   Type_msg_3[string] message_table_3;
 
@@ -185,8 +176,6 @@ void Construct_Default_Classes() {
     };
     classes[DefaultType.booleaner] = _bool;
   }
-<<<<<<< Updated upstream
-=======
   { // unparsed object
     auto _unparsed_object = _base;
     // Set_Parameters(&_unparsed_object, ["Message", "Receiver", "Sender", "Data"],
@@ -211,7 +200,6 @@ void Construct_Default_Classes() {
     //   // return p_receiver.Receive_Msg(p_sender, p_message); // two param
     // };
   }
->>>>>>> Stashed changes
   { // array
     auto _array = _base;
     _array.class_name = "Array";
@@ -442,7 +430,6 @@ void Construct_Default_Class_Related() {
     // };
     symbol_classes[DefaultMessageClass._new] = __new;
   }
-<<<<<<< Updated upstream
   { // ClassBody
     auto _class_body = base;
     _class_body.class_name = "ClassBody";
@@ -457,10 +444,9 @@ void Construct_Default_Class_Related() {
     auto _class_definition = base;
     _class_definition.class_name = "ClassDefinition";
     _class_definition.message_table_3["ASDF"] = function(Obj r, Obj s) {
-    }
+    };
     symbol_classes[DefaultMessageClass.class_definition] = _class_definition;
   }
-=======
   // { // ClassMessageName
   //   auto _class_mname = base;
   //   _class_mname.class_name = "ClassMessageName";
@@ -502,7 +488,6 @@ void Construct_Default_Class_Related() {
     
   //   symbol_classes[DefaultMessageClass.class_body] = _class_body;
   // }
->>>>>>> Stashed changes
 }
 
 
