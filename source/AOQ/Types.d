@@ -1,5 +1,17 @@
   module AOQ.Types;
 
+// Known symbols in an AOQ file
+enum DefaultType {
+  object,
+  integer,
+  floateger,
+  stringeger,
+  booleaner,
+  array,
+  unparsed_object,
+  nil
+};
+
 union CoreDataType {
   Obj    objeger;
   int    integer;
@@ -7,20 +19,6 @@ union CoreDataType {
   float  floateger;
   string stringeger;
   Obj[]  array;
-}
-
-
-// default classes in AOQ that form the CoreDataType
-enum DefaultType {
-  object,
-  nil,
-  integer,
-  symbol,
-  stringeger,
-  floateger,
-  booleaner,
-  array,
-  UNKNOWN,
 };
 
 enum DefaultMessageClass {
@@ -31,7 +29,6 @@ enum DefaultMessageClass {
   // class related ---
   _class, class_name, _new, class_message_name, class_message_params,
   class_message_body, class_message_header,
-  unparsed_object,
 }
 
 int[string] message_map;

@@ -5,7 +5,7 @@ import AOQ.Util;
 
 Obj Interpret_String(ParseTree tree) {
   import std.stdio : writeln, write;
-  Print("----------------------------------------------");
+    Print("----------------------------------------------");
   Print("---------------- interpreting ----------------");
   Print("----------------------------------------------");
   import AOQ.Parser.Symbol,
@@ -48,6 +48,7 @@ private struct Unit_Test {
   }
 
   void Run() {
+    Set_Print_Level(PrintLevel.verbose);
     auto rval = Interpret_String(Translate_String(program));
     import std.stdio : write, writeln;
     write(name, ": ");

@@ -31,8 +31,8 @@ void Set_Print_Level(PrintLevel _print_level) {
 }
 
 void Print(S...)(S args) {
-  if ( cast(int)print_level > PrintLevel.none ) {
+  // if ( cast(int)print_level > PrintLevel.none ) {
     import std.stdio : writeln;
     writeln(args);
-  }
+  // }
 };

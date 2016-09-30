@@ -37,6 +37,8 @@ ParseTree Generate_Parse_Tree(string str) {
   return tree;
 }
 
+// TODO: this should be removed and replaced w/
+//       either a . or unparsed object
 class ParseNode {
   ParseNode node_message, node_receiver, node_sender, node_parent;
   Obj data;
@@ -72,20 +74,6 @@ class ParseNode {
         n_list[i].Print(n_prefix, false, o);
       n_list[$-1].Print(n_prefix, true, o);
     }
-  }
-
-  Obj Evaluate() {
-    if ( node_message is null ) // leaf
-      return data;
-    auto message  = node_message.Evaluate();
-    if ( node_receiver is null )
-      return message;
-    auto receiver = node_receiver.Evaluate();
-    if ( node_sender   is null ) // R < M
-      return receiver.Receive_Msg(message);
-    // R < M < D
-    auto sender = node_sender.Evaluate();
-    return receiver.Receive_Msg(sender, message);
   }
 }
 
@@ -165,7 +153,7 @@ public:
   }
 
   Obj Evaluate() {
-    return root.Evaluate();
+    return root.Receive_Msg("Evaluate");
   }
 
   void Set_Node_Info(string sym) in {

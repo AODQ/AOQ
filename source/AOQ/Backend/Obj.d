@@ -92,12 +92,21 @@ public:
     mixin Make_A_Thing!("booleaner", obj);
     return Activate(i);
   }
-  static Obj* Create(int i) {
-    mixin Make_A_Thing!("booleaner", obj);
-    return Activate(i);
+  static Obj Create(DefaultType _class) {
+    return Create(&classes[_class]);
   }
-  this(Class* _base_class) {
-    Obj* obj = new Obj();
+  static Obj Create(DefaultMessageClass _class) {
+    return Create(&symbol_classes[_class]);
+  }
+  static Obj Create(Obj[] i) {
+    auto obj = Obj();
+    obj.base_class = &classes[DefaultType.array];
+    obj.values.length = 1;
+    obj.values[0].array = i;
+    return obj;
+  }
+  static Obj* Create(Class* _base_class) {
+    Obj obj = new Obj();
     base_class = _base_class;
     values.length = base_class.value_names.length;
     foreach ( n; 0 .. values.length ) {
@@ -117,62 +126,29 @@ public:
         // break;
       }
     }
+    Finalize_Make(obj);
   }
-  // this(Obj[] i) {
-  //   this = Create(i);
-  // }
-  static Obj Create(DefaultType _class) {
-    return Obj(&classes[_class]);
-  }
-  static Obj Create(Obj[] i) {
-    auto obj = Obj();
-    obj.base_class = &classes[DefaultType.array];
-    obj.values.length = 1;
-    obj.values[0].array = i;
-    return obj;
-  }
-  static Obj Create(DefaultMessageClass _class) {
-    return Obj(&symbol_classes[_class]);
-  }
-  static Obj Construct_Default() {
-    return Obj(&classes[DefaultType.nil]);
-  }
-  Obj Receive_Msg(Obj context) {
-    { // ---  DEBUG ---
-      import std.stdio;
-      // writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
-    } // --- EDEBUG ---
-    auto msg_name = context.Call_Function("Stringify");
-    return Call_Function(msg_name.values[0].stringeger);
-  }
-  Obj Receive_Msg(Obj sender, Obj context) {
-    auto msg_name = context.Call_Function("Stringify");
-    // { // ---  DEBUG ---
-    //   import std.stdio;
-    //   writeln("RECEIVED MESSAGE: ", msg_name.values[0].stringeger);
-    // } // --- EDEBUG ---
-    return Call_Function(msg_name.values[0].stringeger, sender);
-  }
-  import AOQ.Backend.Exception;
-  /// Checks that functions exists and then calls it
-  Obj Call_Function(string label) {
-    auto loc = (label in base_class.message_table_2);
+  Obj* Receive_Msg(Obj* sender, Obj* context) {
+    import Env = AOQ.Backend.Enviornment;
+    auto label = context.Call_Function("Stringify");
+    auto loc = (label in (sender is null ? base_class.message_table_2
+                                         : base_class.message_table_3));
     if ( loc !is null ) {
-      return (*loc)(this);
+      Env.Push_Scope();
+      Obj* ret = sender is null ? (*loc)(this) : (*loc)(this, s);
+      Obj* n   = new Obj(*ret);
+      Env.Pop_Scope();
+      Env.Push_Object(n);
+      return n;
     }
-    Throw_Exception("Communication undefined: (" ~ label ~ " "
-                                                ~ Stringify ~ ")");
-    return Obj();
+    Throw_Exception("Communication undefined: (" ~ label ~ " " ~ Stringify
+                    ~ (sender is null ? "" : (" " ~ s.Stringify)) ~ ")");
+    assert(0);
+  }
+  Obj* Receive_Msg(Obj* context) {
+    return Receive_Msg(null, context);
   }
   /// Checks that functions exists and then calls it
-  Obj Call_Function(string label, Obj s) {
-    auto loc = (label in base_class.message_table_3);
-    if ( loc !is null )
-      return (*loc)(this, s);
-    Throw_Exception("Communication undefined: (" ~ label ~ " "
-                     ~ Stringify ~ " " ~ s.Stringify ~ ")");
-    return Obj();
-  }
   string R_String_Value(ulong index) {
   // --- EDEBUG ---
     return CoreDataType_To_String(values[index],
