@@ -13,12 +13,12 @@ enum DefaultType {
 };
 
 union CoreDataType {
-  Obj    objeger;
+  Obj*   objeger;
   int    integer;
   bool   booleaner;
   float  floateger;
   string stringeger;
-  Obj[]  array;
+  Obj*[] array;
 };
 
 enum DefaultMessageClass {

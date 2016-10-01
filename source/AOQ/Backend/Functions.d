@@ -15,8 +15,8 @@ static:
   void Evaluate_Object(Obj* r) {
     auto array = r.values[0].array;
     Obj* message  = array.length > 0 ? array[0] : null,
-        * receiver = array.length > 1 ? array[1] : null,
-        * sender   = array.length > 2 ? array[2] : null;
+         receiver = array.length > 1 ? array[1] : null,
+         sender   = array.length > 2 ? array[2] : null;
     if ( message is null ) // empty statement
       return Obj();
     Obj* eval_message = message.Receive_Msg("__Evaluate");

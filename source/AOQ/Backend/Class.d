@@ -26,10 +26,10 @@ private void Set_Parameters(Class* _class, string[] names,
 
 struct Class {
 public:
-  string          class_name;
-  ulong[string]  value_indices;
-  string[]         value_names;
-  DefaultType[]    value_types;
+  string             class_name;
+  ulong[string]      value_indices;
+  string[]           value_names;
+  DefaultType[]      value_types;
   Type_msg_2[string] message_table_2;
   Type_msg_3[string] message_table_3;
 
@@ -99,7 +99,7 @@ mixin template Floateger_Message_Table_T3(alias r, alias s,
 
 
 void Construct_Default_Classes() {
-  classes.length = DefaultClass.max+1;
+  classes.length = DefaultType.max+1;
   { // base_object
     auto _base_object = Class("object");
     _base_object.message_table_2 = [
@@ -191,7 +191,7 @@ void Construct_Default_Classes() {
     };
     _unparsed_object.message_table_2["Evaluate"] = function(Obj* r) {
       return NonAOQFunc.Evaluate_Object(r);
-    }
+    };
     symbol_classes[DefaultMessageClass.unparsed_object] = _unparsed_object;
   }
   { // array
@@ -518,7 +518,7 @@ void Construct_Default_Symbol_Classes() {
     _dot.class_name = ".";
     _dot.message_table_2["__Evaluate"] = function(Obj r) {
       return NonAOQFunc.Evaluate_Object(r);
-    }
+    };
     symbol_classes[DefaultMessageClass.dot] = _dot;
   }
   { // Stringify
