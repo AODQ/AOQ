@@ -27,7 +27,7 @@ private void Set_Parameters(Class* _class, string[] names,
 struct Class {
 public:
   string             class_name;
-  ulong[string]      value_indices;
+  size_t[string]     value_indices;
   string[]           value_names;
   SymbolType[]       value_types;
   Type_msg_2[string] message_table_2;

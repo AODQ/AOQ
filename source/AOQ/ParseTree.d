@@ -6,7 +6,7 @@ import AOQ.Util;
 ParseTree Generate_Parse_Tree(string str) {
   import std.stdio : writeln;
   ParseTree tree = new ParseTree;
-  ulong start_pos = 0;
+  size_t start_pos = 0;
   bool is_on_word = false;
   foreach ( i ; 0 .. str.length ) {
     // writeln("C: ", str[i]);

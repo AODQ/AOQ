@@ -149,7 +149,7 @@ public:
                      ~ Stringify ~ " " ~ s.Stringify ~ ")");
     return Obj();
   }
-  string R_String_Value(ulong index) {
+  string R_String_Value(size_t index) {
   // --- EDEBUG ---
     return CoreDataType_To_String(values[index],
                   base_class.value_types[index]);
