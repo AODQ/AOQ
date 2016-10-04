@@ -1,0 +1,5 @@
+(Class (ClassLabel Range) {ClassBody (ClassVars (~ lower higher)) (Function new (FuncDef (Funclabel Range) input_list!Array!int) '((promote self (( : = ) _lower (([ ]) input_list 0))) . (promote self (( : = ) _higher (([ ]) input_list 1)))
+.
+(Class (ClassLabel Fold) {ClassBody (ClassVars (~ range)) (Function new (FuncDef (FuncLabel Fold) _range!Range) '(promote self _range) (Function New (FuncDef (FuncLabel Loop) upper!int) (Body '(^(If upper `(Loop (- upper 1)) 0))))})
+.
+(Fold (Range 0 10) '(Print $$))
