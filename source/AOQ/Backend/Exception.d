@@ -11,11 +11,11 @@ void Throw_Exception(string s, bool check = false) {
 }
 
 import AOQ.Backend.Obj;
-void Throw_Exception(Obj receiver, Obj sender, string msg) {
+void Throw_Exception(Obj* receiver, Obj* sender, string msg) {
   Throw_Exception(receiver.Stringify() ~ ' ' ~ msg ~ ' ' ~ sender.Stringify() ~
                     " has undefined communication");
 }
 
-void Throw_Exception(Obj receiver, Obj sender, Obj msg) {
+void Throw_Exception(Obj* receiver, Obj* sender, Obj msg) {
   Throw_Exception(receiver, sender, msg.Stringify());
 }

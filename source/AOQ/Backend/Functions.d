@@ -12,7 +12,7 @@ static:
     nclass.class_name = class_label.Stringify();
     symbol_classes ~= nclass;
   }
-  void Evaluate_Object(Obj* r) {
+  Obj* Evaluate_Object(Obj* r) {
     auto array = r.values[0].array;
     Obj* message  = array.length > 0 ? array[0] : null,
          receiver = array.length > 1 ? array[1] : null,

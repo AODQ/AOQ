@@ -51,7 +51,7 @@ public:
 
 mixin template Integer_Message_Table_T3(alias r, alias s,
                                         alias func, string sign) {
-  Obj Execute_Fn() {
+  Obj* Execute_Fn() {
     // Size must be one, element must be valid
     if ( s.base_class.value_types.length != 1 )
       Throw_Exception(r, s, sign);
@@ -61,14 +61,15 @@ mixin template Integer_Message_Table_T3(alias r, alias s,
         Throw_Exception(r, s, sign);
         assert(0);
       case DefaultType.booleaner:
-        return Obj(func(r.values[0].integer, cast(int)s.values[0].booleaner));
+        return Obj.Create(func(r.values[0].integer,
+                      cast(int)s.values[0].booleaner));
       case DefaultType.integer:
-        return Obj(func(r.values[0].integer, s.values[0].integer));
+        return Obj.Create(func(r.values[0].integer, s.values[0].integer));
       case DefaultType.floateger:
-        return Obj(func(r.values[0].integer, s.values[0].floateger));
+        return Obj.Create(func(r.values[0].integer, s.values[0].floateger));
       case DefaultType.object:
         // Don't know how to handle this! Let the object do it!
-        return s.Receive_Msg(Obj(sign), r);
+        return s.Receive_Msg(Obj.Create(sign), r);
     }
     assert(0);
   }
@@ -76,7 +77,7 @@ mixin template Integer_Message_Table_T3(alias r, alias s,
 
 mixin template Floateger_Message_Table_T3(alias r, alias s,
                                         alias func, string sign) {
-  Obj Execute_Fn() {
+  Obj* Execute_Fn() {
     // Size must be one, element must be valid
     if ( s.base_class.value_types.length != 1 )
       Throw_Exception(r, s, sign);
@@ -86,12 +87,12 @@ mixin template Floateger_Message_Table_T3(alias r, alias s,
         Throw_Exception(r, s, sign);
         assert(0);
       case DefaultType.integer:
-        return Obj(func(r.values[0].floateger, s.values[0].integer));
+        return Obj.Create(func(r.values[0].floateger, s.values[0].integer));
       case DefaultType.floateger:
-        return Obj(func(r.values[0].floateger, s.values[0].floateger));
+        return Obj.Create(func(r.values[0].floateger, s.values[0].floateger));
       case DefaultType.object:
         // Don't know how to handle this! Let the object do it!
-        return s.Receive_Msg(Obj(sign), r);
+        return s.Receive_Msg(Obj.Create(sign), r);
     }
     assert(0);
   }
@@ -104,16 +105,16 @@ void Construct_Default_Classes() {
     auto _base_object = Class("object");
     _base_object.message_table_2 = [
       "R_ClassName"    : function(Obj* r) {
-        return Obj(r.base_class.class_name);
+        return Obj.Create(r.base_class.class_name);
       },
       "Stringify"      : function(Obj* r) {
-        return Obj(r.base_class.class_name);
+        return Obj.Create(r.base_class.class_name);
       },
       "Valueify"       : function(Obj* r) {
-        return Obj.Create(DefaultClass.object);
+        return Obj.Create(DefaultType.object);
       },
       "Truthity"       : function(Obj* r) {
-        return Obj(true);
+        return Obj.Create(true);
       },
       "Print"          : function(Obj* r) {
         import std.stdio : writeln;
@@ -135,7 +136,7 @@ void Construct_Default_Classes() {
       "If"             : function(Obj* r, Obj* s) {
         if ( r.Truthity() )
           return s;
-        return Obj(DefaultType.nil);
+        return Obj.Create(DefaultType.nil);
       },
       "^"              : function(Obj* r, Obj* s) {
         if ( r.Truthity() )
@@ -156,32 +157,32 @@ void Construct_Default_Classes() {
         assert(0);
       },
       "~"              : function(Obj* r, Obj* s) {
-        r = r.Receive_Msg(Obj("Array"), Obj("Cast"));
-        s = s.Receive_Msg(Obj("Array"), Obj("Cast"));
-        return r.Receive_Msg(s, Obj("~"));
+        r = r.Receive_Msg(Obj.Create("Array"), Obj.Create("Cast"));
+        s = s.Receive_Msg(Obj.Create("Array"), Obj.Create("Cast"));
+        return r.Receive_Msg(s, Obj.Create("~"));
       }
     ];
-    classes[DefaultClass.object] = _base_object;
+    classes[DefaultType.object] = _base_object;
   }
   auto _base = classes[0];
   { // nil
     auto _nil = _base;
     _nil.class_name = "nil";
     _nil.message_table_2["Is"] = function(Obj* r) {
-      return Obj(false);
+      return Obj.Create(false);
     };
     _nil.message_table_2["Truthity"] = function(Obj* r) {
-      return Obj(false);
+      return Obj.Create(false);
     },
-    classes[DefaultClass.nil] = _nil;
+    classes[DefaultType.nil] = _nil;
   }
   { // booleaner
     auto _bool = _base;
     _bool.class_name = "Bool";
     _bool.message_table_2["Stringify"] = function(Obj* r) {
-      return Obj(r.values[0].booleaner == true ? "True" : "False");
+      return Obj.Create(r.values[0].booleaner == true ? "True" : "False");
     };
-    classes[DefaultClass.booleaner] = _bool;
+    classes[DefaultType.booleaner] = _bool;
   }
   { // unparsed object
     auto _unparsed_object = classes[DefaultMessageClass.dot];
@@ -206,10 +207,10 @@ void Construct_Default_Classes() {
       foreach ( n; arr ) {
         str ~= n.Stringify();
       }
-      return Obj(str);
+      return Obj.Create(str);
     };
     _array.message_table_2["Truthity"] = function(Obj* r) {
-      return Obj(r.values[0].array.length != 0);
+      return Obj.Create(r.values[0].array.length != 0);
     };
     _array.message_table_2["Print"] = function(Obj* r) {
       string str = "[";
@@ -227,7 +228,7 @@ void Construct_Default_Classes() {
     };
 
     _array.message_table_3["~"] = function(Obj* r, Obj* s) {
-      s = s.Receive_Msg(Obj("Array"), Obj("Cast"));
+      s = s.Receive_Msg(Obj.Create("Array"), Obj.Create("Cast"));
       return Obj.Create(r.values[0].array ~ s.values[0].array);
     };
     _array.message_table_3["Cast"] = function(Obj* r, Obj* s) {
@@ -239,7 +240,7 @@ void Construct_Default_Classes() {
                       sstr);
       assert(0);
     };
-    classes[DefaultClass.array] = _array;
+    classes[DefaultType.array] = _array;
   }
   { // integer
     auto _int = _base;
@@ -250,10 +251,10 @@ void Construct_Default_Classes() {
     // -- define functions
     _int.message_table_2["Stringify"] = function(Obj* r) {
       import std.conv : to;
-      return Obj(to!string(r.values[0].integer));
+      return Obj.Create(to!string(r.values[0].integer));
     };
     _int.message_table_2["Truthity"]  = function(Obj* r) {
-      return Obj(cast(bool)(r.values[0].integer != 0));
+      return Obj.Create(cast(bool)(r.values[0].integer != 0));
     };
     _int.message_table_2["Print"] = function(Obj* r) {
       import std.stdio : writeln;
@@ -306,20 +307,20 @@ void Construct_Default_Classes() {
       _range.values[1].integer = s.values[0].integer;
       return _range;
     };
-    classes[DefaultClass.integer] = _int;
+    classes[DefaultType.integer] = _int;
   }
   {
-    auto _float = classes[DefaultClass.integer];
+    auto _float = classes[DefaultType.integer];
     _float.class_name = "floateger";
     _float.value_types = [DefaultType.floateger];
     // -- define functions
     _float.message_table_2["Stringify"] = function(Obj* r) {
       import std.conv : to;
-      return Obj(to!string(r.values[0].floateger));
+      return Obj.Create(to!string(r.values[0].floateger));
     };
     _float.message_table_2["Truthity"]  = function(Obj* r) {
       // TODO: make abs function
-      return Obj(r.values[0].floateger < float.epsilon);
+      return Obj.Create(r.values[0].floateger < float.epsilon);
     };
     _float.message_table_3["+"] = function(Obj* r, Obj* s) {
       auto f_add = function(float _r, float _s) { return _r + _s; };
@@ -347,7 +348,7 @@ void Construct_Default_Classes() {
       mixin Floateger_Message_Table_T3!(r, s, f_ast, "*");
       return Execute_Fn();
     };
-    classes[DefaultClass.floateger] = _float;
+    classes[DefaultType.floateger] = _float;
   }
   { // symbol
     auto _symbol = _base;
@@ -356,7 +357,7 @@ void Construct_Default_Classes() {
       auto e = Obj.Create(r.base_class.class_name);
       return e;
     };
-    classes[DefaultClass.symbol] = _symbol;
+    classes[DefaultType.symbol] = _symbol;
     // can construct symbol classes now that we have a symbol
     Construct_Default_Symbol_Classes();
   }
@@ -370,15 +371,15 @@ void Construct_Default_Classes() {
       return r;
     };
     _str.message_table_3["~"]         = function(Obj* r, Obj* s) {
-      return Obj(r.Stringify() ~ s.Stringify());
+      return Obj.Create(r.Stringify() ~ s.Stringify());
     };
-    classes[DefaultClass.stringeger] = _str;
+    classes[DefaultType.stringeger] = _str;
   }
   Construct_Default_Class_Related();
 }
 
 void Construct_Default_Class_Related() {
-  auto base = classes[DefaultClass.object];
+  auto base = classes[DefaultType.object];
   { // Class
     auto __class = base;
     __class.class_name = "Class";
@@ -392,17 +393,17 @@ void Construct_Default_Class_Related() {
         import std.stdio;
         writeln("Created class: ", symbol_classes[$-1].class_name);
       } // --- EDEBUG ---
-      return Obj(&symbol_classes[$-1]);
+      return Obj.Create(&symbol_classes[$-1]);
     };
     symbol_classes[DefaultMessageClass._class] = __class;
   }
   { // ClassName
-    auto _class_name = classes[DefaultClass.stringeger];
+    auto _class_name = classes[DefaultType.stringeger];
     _class_name.message_table_2["Stringify"] = function(Obj* r) {
-      return Obj("ClassName");
+      return Obj.Create("ClassName");
     };
     _class_name.message_table_2["Valueify"] = function(Obj* r) {
-      return Obj(r.values[0].stringeger);
+      return Obj.Create(r.values[0].stringeger);
     };
     _class_name.message_table_3["New"] = function(Obj* r, Obj* s) {
       auto obj = Obj.Create(DefaultMessageClass.class_name);
@@ -421,8 +422,8 @@ void Construct_Default_Class_Related() {
   //   _class_mname.class_name = "ClassMessageName";
   //   _class_mname.message_table_3["+"] = function(Obj* r, Obj* s) {
   //     Obj n = Obj.Create(DefaultMessageClass.class_message_header);
-  //     return n.Receive_Msg(r.Valueify(), Obj("SetMessageName"))
-  //             .Receive_Msg(s.Valueify(), Obj("SetMessageParams"));
+  //     return n.Receive_Msg(r.Valueify(), Obj.Create("SetMessageName"))
+  //             .Receive_Msg(s.Valueify(), Obj.Create("SetMessageParams"));
   //   };
   //   symbol_classes[DefaultMessageClass.class_message_name] = _class_mname;
   // }
@@ -430,10 +431,10 @@ void Construct_Default_Class_Related() {
   //   auto _class_mparams = symbol_classes[DefaultMessageClass.class_name];
   //   _class_mparams.class_name = "ClassMessageParams";
   //   _class_mparams.message_table_2["Stringify"] = function(Obj* r) {
-  //     return Obj("ClassMessageParams");
+  //     return Obj.Create("ClassMessageParams");
   //   };
   //   _class_mparams.message_table_3["New"] = function(Obj* r) {
-  //     return r.Receive_Msg(Obj(""), "New");
+  //     return r.Receive_Msg(Obj.Create(""), "New");
   //   };
   //   symbol_classes[DefaultMessageClass.class_message_params] = _class_mparams;
   // }
@@ -461,7 +462,7 @@ void Construct_Default_Class_Related() {
 
 
 void Construct_Default_Symbol_Classes() {
-  auto symbol = classes[DefaultClass.symbol];
+  auto symbol = classes[DefaultType.symbol];
   symbol_classes.length = DefaultMessageClass.max + 1;
   { // +
     auto _plus = symbol;
@@ -484,7 +485,7 @@ void Construct_Default_Symbol_Classes() {
     //   //   return "//";
     //   // };
     //   // return o;
-    //   return Obj();
+    //   return Obj.Create();
     // };
     symbol_classes[DefaultMessageClass.slash] = _slash;
   }
@@ -514,7 +515,7 @@ void Construct_Default_Symbol_Classes() {
     symbol_classes[DefaultMessageClass.bslash] = _bslash;
   }
   { // dot
-    auto _dot = classes[DefaultClass.array];
+    auto _dot = classes[DefaultType.array];
     _dot.class_name = ".";
     _dot.message_table_2["__Evaluate"] = function(Obj r) {
       return NonAOQFunc.Evaluate_Object(r);
@@ -552,7 +553,7 @@ void Construct_Default_Symbol_Classes() {
       int low = r.values[0].integer,
           hi  = r.values[1].integer;
       if ( low >= hi )
-        return Obj(0);
+        return Obj.Create(0);
       Obj* sum;
       foreach ( it; low .. hi ) {
         Obj nval = Obj.Create(it).Receive_Msg(s);
@@ -565,7 +566,7 @@ void Construct_Default_Symbol_Classes() {
           //           ") with ", nval.base_class.class_name, " (",
           //           nval.Stringify, ")");
           // } // --- EDEBUG ---
-          sum = sum.Receive_Msg(nval, Obj("+"));
+          sum = sum.Receive_Msg(nval, Obj.Create("+"));
           // { // ---  DEBUG ---
           //   import std.stdio;
           //   writeln("New sum: ", sum.base_class.class_name, " (", sum.Stringify,
@@ -579,11 +580,11 @@ void Construct_Default_Symbol_Classes() {
       int low = r.values[0].integer,
           hi  = r.values[1].integer;
       if ( low >= hi )
-        return Obj(0);
+        return Obj.Create(0);
       foreach ( it; low .. hi ) {
-        Obj(it).Receive_Msg(s);
+        Obj.Create(it).Receive_Msg(s);
       }
-      return Obj(DefaultType.nil);
+      return Obj.Create(DefaultType.nil);
     };
     symbol_classes[DefaultMessageClass.range] = _range;
   }
