@@ -1,5 +1,5 @@
 # AoQ
-An interpreted, dynamically-typed, functional object-oriented language to be
+An interpreted, dynamically-typed language to be
 used with my AoD engine. Heavily based off D and LISP.
 
 example program
@@ -19,9 +19,9 @@ entity Ball {
 Sqr_And_Double |x| {
   (map x '(|n| { * n 2 }))
 }
-
-
--- pipe dream --
+```
+-- pipe dreams --
+```
 ) modules
     module ball;
     import square, rectangle;
@@ -33,4 +33,9 @@ Sqr_And_Double |x| {
     (assert some_condition error_message)
 ) objects with mixins (composability)
 
+```
+-- Why? --
+```
+) ties directly into AOD
+) allows for fast, continous development
 ```
