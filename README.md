@@ -1,8 +1,24 @@
 # AoQ
-An interpreted, dynamically-typed, functional, message-based object-oriented language.
+An interpreted, dynamically-typed language.
 Made only to learn
 
-example program
+
+Working programs
+```
+( ^ ( If 1 2 ) 1 ) ; Prints 2
+```
+```
+( ^ ( If 0 1 ) ( If 1 8 ) ) ; Prints 8
+```
+```
+( ( ^ ( If 0 + ) * ) ( + 2 3 ) ( + 3 2 ) ) ; Prints 25
+```
+```
+( ( ~ Loop_ Sum ) ( Range 0 10 ) . ) ; Prints 45
+```
+
+
+Pipedream program
 ```
 (module example_program)
 (import (~ math io))
@@ -59,11 +75,8 @@ example program
 
 strange rules and oddities (until I can write proper documentation)
 ```
-) Everything is an object. (+ 3 5) is an object, the + is an object, the 3 is an object, etc. Even
-    the class is just an object.
 ) Every object/message can only take one or zero arguments
 ) Every object is constant
-) Nearby operators are actualy two objects (:= becomes (= :))
 ) Infix messages (ei: 3 + 5) are allowed if either both sides are 'balanced' (there is only one object
     on each side), or there is no whitespace which allows for things like: x std:sqr y (two in-fix
     messages disguised as one: (x (std:sqrt) y)
